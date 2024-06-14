@@ -13,7 +13,7 @@ using s32 = std::int32_t;
 
 static bool quit = false;
 
-static constexpr u8 numPlayers = 4;
+static constexpr u8 numPlayers = 3;
 static constexpr int game_width = 10 + ((numPlayers - 1) * 3.4);
 static constexpr int game_height = 20;
 static constexpr int board_height = 22;
@@ -22,4 +22,4 @@ static constexpr int sideBuffer = 8; //Gives 8 tiles worth of space on left and 
 static constexpr int width = (sideBuffer * 2 + game_width) * size;
 static constexpr int height = (size * game_height) + (size * 2);
 static constexpr int boardXOffset = (width / size - game_width) / 2; //Offset is left and right sides so we / 2
-static constexpr bool boardYOffset = (height / size - game_height) / 2;
+static constexpr int boardYOffset = (height / size - game_height) / 2;

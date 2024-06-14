@@ -2,7 +2,7 @@
 
 This is a multiplayer version of Tetris that supports up to 4 players! Game is playable, though to change the controls and number of players you currently have to change them directly in the code.
 
-The game board size scales with the number of players, so 1 player is normal tetris size, 2 players is slightly bigger, etc.
+The game m_board size scales with the number of players, so 1 player is normal tetris size, 2 players is slightly bigger, etc.
 
 ## Current Controls
 
@@ -34,6 +34,6 @@ The game board size scales with the number of players, so 1 player is normal tet
     Numpad5 -> Soft Drop
     Numpad0 -> Hard Drop
 
-While this control system needs to be improved, it is hard to get four hands on the keyboard. Adjustments will be made in the future to allow users to change their controls without diving into the code.
+While this control system needs to be improved, it is hard to get four hands on the keym_board. Adjustments will be made in the future to allow users to change their controls without diving into the code.
 
 CMake is the build system for this project, for your convenience. You will need vcpkg and cmake Version 3.16 or later to build.

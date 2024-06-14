@@ -3,10 +3,10 @@
 #include "../Headers/Game.hpp"
 
 
-Game::Game() : m_window(sf::VideoMode(width, height), "TETRIS"), renderer(&m_window) {
+Game::Game() : m_window(sf::VideoMode(width, height), "TETRIS"), m_renderer(&m_window) {
 	for (u8 i = 0; i < numPlayers; ++i) {
-		states[i] = std::make_unique<State>(State());
-		states[i]->nextPiece = std::make_unique<Piece>(blocks.getBlock());
+		m_states[i] = std::make_unique<State>(State());
+		m_states[i]->nextPiece = std::make_unique<Piece>(m_blocks.getBlock());
 		newPiece(i);
 
 		PlayerColor pc;
@@ -26,22 +26,22 @@ Game::Game() : m_window(sf::VideoMode(width, height), "TETRIS"), renderer(&m_win
 			pc.fillColor = sf::Color::Magenta;
 			pc.ghostFillColor = sf::Color(100, 0, 50, 100);
 		}
-		playerColors[i] = pc;
+		m_playerColors[i] = pc;
 	}
-	std::fill(board.begin(), board.end(), 0);
-	time = sf::milliseconds(timeToNextDrop * 1000);
+	std::fill(m_board.begin(), m_board.end(), 0);
+	m_time = sf::milliseconds(m_timeToNextDrop * 1000);
 	getLevel();
 	loop();
 }
 void Game::newPiece(u8 playerIndex) {
-	states[playerIndex]->piece = std::move(states[playerIndex]->nextPiece); //Next piece becomes current piece
-	states[playerIndex]->nextPiece = std::make_unique<Piece>(blocks.getBlock()); //Next piece becomes a new piece
+	m_states[playerIndex]->piece = std::move(m_states[playerIndex]->nextPiece); //Next piece becomes current piece
+	m_states[playerIndex]->nextPiece = std::make_unique<Piece>(m_blocks.getBlock()); //Next piece becomes a new piece
 
-	states[playerIndex]->xOffset = ((game_width * (playerIndex + 1)) / numPlayers) - 4;
-	states[playerIndex]->yOffset = 0;
-	states[playerIndex]->rotation = 0;
+	m_states[playerIndex]->xOffset = ((game_width * (playerIndex + 1)) / numPlayers) - 4;
+	m_states[playerIndex]->yOffset = 0;
+	m_states[playerIndex]->rotation = 0;
 }
-bool Game::getPiece(u8 x, u8 y, Piece* p, u8 rotation) {
+bool Game::getPiece(u8 x, u8 y, std::unique_ptr<Piece>& p, u8 rotation) {
 	switch (rotation) {
 	case 0:
 		return (p->data[y * p->width + x]);
@@ -60,52 +60,53 @@ void Game::loop() {
 	while (m_window.isOpen() && !quit) {
 		input();
 		renderGame();
-		if (time.asMilliseconds() <= 0) {
-			for (u8 i = 0; i < states.size(); ++i) {
-				++states[i]->yOffset;
+		if (m_time.asMilliseconds() <= 0) {
+			for (u8 i = 0; i < numPlayers; ++i) {
+				++m_states[i]->yOffset;
 			}
 			setTimeNextDrop();
 		}
-		for (u8 i = 0; i < states.size(); ++i) {
-			if (hasCollided(states[i].get())) {
-				--states[i]->yOffset;
-				updateBoard(i);
+		for (u8 playerIndex = 0; playerIndex < numPlayers; ++playerIndex) {
+			if (hasCollided(playerIndex)) {
+				--m_states[playerIndex]->yOffset;
+				updateBoard(playerIndex);
 				clearLines();
 				quit = hasLost();
 				getLevel();
-				newPiece(i);
+				newPiece(playerIndex);
 			}
 		}
 
-		time -= clock.restart();
+		m_time -= m_clock.restart();
 	}
 	while (quit && m_window.isOpen()) {
-		renderer.clearRenderer();
+		m_renderer.clearRenderer();
 		input();
 		renderBoard();
 		renderBorder();
 		renderText();
-		renderer.showRenderer();
+		m_renderer.showRenderer();
 	}
 }
 void Game::getLevel() {
-	level = lines / 10;
-	if (level > 29) {
-		level = 29; //Level 29 (30 if not 0 indexing) is the max level
+	m_level = m_lines / 10;
+	if (m_level > 29) {
+		m_level = 29; //Level 29 (30 if not 0 indexing) is the max m_level
 	}
 }
 void Game::setTimeNextDrop() {
-	timeToNextDrop = framesPerDrop[level] / framesPerSecond;
-	time = sf::milliseconds(timeToNextDrop * 1000);
+	m_timeToNextDrop = m_framesPerDrop[m_level] / framesPerSecond;
+	m_time = sf::milliseconds(m_timeToNextDrop * 1000);
 }
-void Game::updateBoard(u8 playerIndex) { //Board gets updated when the playing piece collides with the board
-	for (int x = 0; x < states[playerIndex]->piece->width; ++x) {
-		for (int y = 0; y < states[playerIndex]->piece->width; ++y) {
-			if (getPiece(x, y, states[playerIndex]->piece.get(), states[playerIndex]->rotation)) {
-				s8 bX = states[playerIndex]->xOffset + x;
-				s8 bY = states[playerIndex]->yOffset + y;
+void Game::updateBoard(u8 playerIndex) { //Board gets updated when the playing piece collides with the m_board
+	std::unique_ptr<State>& state = m_states[playerIndex];
+	for (int x = 0; x < state->piece->width; ++x) {
+		for (int y = 0; y < state->piece->width; ++y) {
+			if (getPiece(x, y, state->piece, state->rotation)) {
+				s8 bX = state->xOffset + x;
+				s8 bY = state->yOffset + y;
 				if (bY >= 0)
-					board[bY * game_width + bX] = playerIndex + 1;
+					m_board[bY * game_width + bX] = playerIndex + 1;
 				else {
 					quit = true;
 				}
@@ -115,40 +116,41 @@ void Game::updateBoard(u8 playerIndex) { //Board gets updated when the playing p
 }
 bool Game::isFullRow(int y) {
 	for (int x = 0; x < game_width; ++x) { //Every tile in a given row
-		if (!board[y * game_width + x])//If a single spot in a row isn't a block we don't need to keep checking it
+		if (!m_board[y * game_width + x])//If a single spot in a row isn't a block we don't need to keep checking it
 			return false;
 	}
 	return true;
 }
 void Game::clearLines() {
-	clearedLines = 0;
+	m_clearedLines = 0;
 	for (int y = 0; y < game_height; ++y) { //Every row
 		if (isFullRow(y)) {
 			for (int x = 0; x < game_width; ++x) {
-				board[y * game_width + x] = 0; //If its a full row, we clear it
+				m_board[y * game_width + x] = 0; //If its a full row, we clear it
 			}
-			++clearedLines;
-			yClearLevel = y;
+			++m_clearedLines;
+			m_yClearLevel = y;
 		}
 	}
-	lines += clearedLines; //Updating total amount of lines cleared
-	while (clearedLines > 0) { //If we clear 1 line, we drop the rest of the board one time. Two times for 2 cleared lines, and so on
-		for (int y = yClearLevel; y > 0; --y) {
+	m_lines += m_clearedLines; //Updating total amount of lines cleared
+	while (m_clearedLines > 0) { //If we clear 1 line, we drop the rest of the m_board one time. Two times for 2 cleared lines, and so on
+		for (int y = m_yClearLevel; y > 0; --y) {
 			for (int x = 0; x < game_width; ++x) {
-				board[y * game_width + x] = board[(y - 1) * game_width + x];
+				m_board[y * game_width + x] = m_board[(y - 1) * game_width + x];
 			}
 		}
-		--clearedLines;
+		--m_clearedLines;
 	}
 }
 
-bool Game::hasCollided(State* state) {
+bool Game::hasCollided(u8 playerIndex) {
+	std::unique_ptr<State>& state = m_states[playerIndex];
 	for (int x = 0; x < state->piece->width; ++x) {
 		for (int y = 0; y < state->piece->width; ++y) {
-			if (getPiece(x, y, state->piece.get(), state->rotation)) {
+			if (getPiece(x, y, state->piece, state->rotation)) {
 				u8 bX = state->xOffset + x;
 				u8 bY = state->yOffset + y;
-				if (bY >= 0 && (board[bY * game_width + bX] >= 1 || bY >= game_height)) {
+				if (bY >= 0 && (m_board[bY * game_width + bX] >= 1 || bY >= game_height)) {
 					return true;
 				}
 			}
@@ -158,19 +160,20 @@ bool Game::hasCollided(State* state) {
 }
 bool Game::hasLost() {
 	for (int x = 0; x < game_width; ++x) {
-		if (board[x]) //If there is a piece on the top row, then we lose
+		if (m_board[x]) //If there is a piece on the top row, then we lose
 			return true;
 	}
 	return false;
 }
 
 bool Game::canWallKick(u8 rotation, u8 playerIndex) {
-	for (int x = 0; x < states[playerIndex]->piece->width; ++x) {
-		for (int y = 0; y < states[playerIndex]->piece->width; ++y) {
-			if (getPiece(x, y, states[playerIndex]->piece.get(), rotation)) {
-				s8 bX = states[playerIndex]->xOffset + x;
-				s8 bY = states[playerIndex]->yOffset + y;
-				if (board[bY * game_width + bX]) {
+	std::unique_ptr<State>& state = m_states[playerIndex];
+	for (int x = 0; x < state->piece->width; ++x) {
+		for (int y = 0; y < state->piece->width; ++y) {
+			if (getPiece(x, y, state->piece, rotation)) {
+				s8 bX = state->xOffset + x;
+				s8 bY = state->yOffset + y;
+				if (m_board[bY * game_width + bX]) {
 					return false;
 				}
 			}
@@ -179,19 +182,20 @@ bool Game::canWallKick(u8 rotation, u8 playerIndex) {
 	return true;
 }
 void Game::wallKick(u8 playerIndex) {
-	for (int x = 0; x < states[playerIndex]->piece->width; ++x) {
-		for (int y = 0; y < states[playerIndex]->piece->width; ++y) {
-			if (getPiece(x, y, states[playerIndex]->piece.get(), states[playerIndex]->rotation)) {
-				s8 bX = states[playerIndex]->xOffset + x;
-				s8 bY = states[playerIndex]->yOffset + y;
+	std::unique_ptr<State>& state = m_states[playerIndex];
+	for (int x = 0; x < state->piece->width; ++x) {
+		for (int y = 0; y < state->piece->width; ++y) {
+			if (getPiece(x, y, state->piece, state->rotation)) {
+				s8 bX = state->xOffset + x;
+				s8 bY = state->yOffset + y;
 				if (bX < 0) {
-					states[playerIndex]->xOffset -= bX;
+					state->xOffset -= bX;
 				}
 				if (bX >= game_width) {
-					states[playerIndex]->xOffset -= (bX - game_width) + 1;
+					state->xOffset -= (bX - game_width) + 1;
 				}
 				if (bY >= game_height) {
-					--states[playerIndex]->yOffset;
+					--state->yOffset;
 				}
 			}
 		}
@@ -201,13 +205,14 @@ void Game::wallKick(u8 playerIndex) {
 u8 Game::getBottom(u8 playerIndex, bool ghost) {
 	u8 checkAmount;
 	u8 finalAmount = game_height;
-	for (int x = 0; x < states[playerIndex]->piece->width; ++x) {
-		for (int y = 0; y < states[playerIndex]->piece->width; ++y) {
-			if (getPiece(x, y, states[playerIndex]->piece.get(), states[playerIndex]->rotation)) {
+	std::unique_ptr<State>& state = m_states[playerIndex];
+	for (int x = 0; x < state->piece->width; ++x) {
+		for (int y = 0; y < state->piece->width; ++y) {
+			if (getPiece(x, y, state->piece, state->rotation)) {
 				checkAmount = 0;
-				s8 bX = states[playerIndex]->xOffset + x;
-				s8 bY = states[playerIndex]->yOffset + y + ghost; //If we are getting the ghost piece, it is 1 value higher
-				while (board[bY * game_width + bX] < 1 && bY < game_height) {
+				s8 bX = state->xOffset + x;
+				s8 bY = state->yOffset + y + ghost; //If we are getting the ghost piece, it is 1 value higher
+				while (m_board[bY * game_width + bX] < 1 && bY < game_height) {
 					++checkAmount;
 					++bY;
 				}
@@ -221,9 +226,9 @@ u8 Game::getBottom(u8 playerIndex, bool ghost) {
 }
 //Sends everything to the renderer to be drawn
 void Game::renderGame() {
-	renderer.clearRenderer();
+	m_renderer.clearRenderer();
 
-	for (u8 playerIndex = 0; playerIndex < states.size(); ++playerIndex) {
+	for (u8 playerIndex = 0; playerIndex < numPlayers; ++playerIndex) {
 		renderPiece(PieceToDraw::NormalPiece, playerIndex);
 		u8 ghostPieceDrop = getBottom(playerIndex, true);
 		renderPiece(PieceToDraw::GhostPiece, playerIndex, ghostPieceDrop);
@@ -233,60 +238,66 @@ void Game::renderGame() {
 	renderBorder();
 	renderText();
 
-	renderer.showRenderer();
+	m_renderer.showRenderer();
 }
 //Draws the piece you are playing, the ghost piece for hard-drop accuracy, and the upcoming piece
 void Game::renderPiece(PieceToDraw piece, u8 playerIndex, u8 yAmount) {
-	for (int y = 0; y < states[playerIndex]->piece->width; ++y) {
-		for (int x = 0; x < states[playerIndex]->piece->width; ++x) {
-			if (getPiece(x, y, states[playerIndex]->piece.get(), states[playerIndex]->rotation)) {
+	std::unique_ptr<State>& state = m_states[playerIndex];
+	PlayerColor* playerColor = &m_playerColors[playerIndex];
+	for (int y = 0; y < state->piece->width; ++y) {
+		for (int x = 0; x < state->piece->width; ++x) {
+			if (getPiece(x, y, state->piece, state->rotation)) {
 				switch (piece) {
 				case PieceToDraw::NormalPiece:
-					renderer.draw(x + states[playerIndex]->xOffset + boardXOffset, y + states[playerIndex]->yOffset + boardYOffset, playerColors[playerIndex].fillColor, sf::Color::White);
+					m_renderer.draw(x + state->xOffset + boardXOffset, y + state->yOffset + boardYOffset, playerColor->fillColor, sf::Color::White);
 					break;
 				case PieceToDraw::GhostPiece:
-					renderer.draw(x + states[playerIndex]->xOffset + boardXOffset, y + states[playerIndex]->yOffset + boardYOffset + yAmount, playerColors[playerIndex].ghostFillColor, ghostOutlineColor);
+					m_renderer.draw(x + state->xOffset + boardXOffset, y + state->yOffset + boardYOffset + yAmount, playerColor->ghostFillColor, ghostOutlineColor);
 					break;
 				}
 			}
 		}
 	}
 }
-void Game::renderBoard() { //Draws all pieces that are currently on the board
+void Game::renderBoard() { //Draws all pieces that are currently on the m_board
+
 	for (int x = 0; x < game_width; ++x) {
 		for (int y = 0; y < game_height; ++y) {
-			if (board[y * game_width + x])
-				renderer.draw(x + boardXOffset, y + boardYOffset, playerColors[board[y * game_width + x] - 1].fillColor, sf::Color::White);
+			if (m_board[y * game_width + x]) {
+				PlayerColor* playerColor = &m_playerColors[m_board[y * game_width + x] - 1];
+				m_renderer.draw(x + boardXOffset, y + boardYOffset, playerColor->fillColor, sf::Color::White);
+			}
 		}
 	}
 }
 void Game::renderBorder() { //Draws the border around the playable area
 	for (int x = 7; x < game_width + 9; ++x) {
-		renderer.draw(x, 0, sf::Color::White, sf::Color::Blue);
-		renderer.draw(x, game_height + 1, sf::Color::White, sf::Color::Blue);
+		m_renderer.draw(x, 0, sf::Color::White, sf::Color::Blue);
+		m_renderer.draw(x, game_height + 1, sf::Color::White, sf::Color::Blue);
 	}
 	for (int y = 0; y < game_height + 1; ++y) {
-		renderer.draw(7, y, sf::Color::White, sf::Color::Blue);
-		renderer.draw(game_width + 8, y, sf::Color::White, sf::Color::Blue);
+		m_renderer.draw(7, y, sf::Color::White, sf::Color::Blue);
+		m_renderer.draw(game_width + 8, y, sf::Color::White, sf::Color::Blue);
 	}
 }
 void Game::renderText() {
-	std::string lvlStr = "Level: " + std::to_string(level + 1); //Levels are 1-30 but arrays are 0-indexed, so we add 1 purely for display
-	std::string linesStr = "Lines: " + std::to_string(lines);
-	renderer.drawText(width - 200, height / 2, lvlStr);
-	renderer.drawText(width - 200, height / 2 + 50, linesStr);
+	std::string lvlStr = "Level: " + std::to_string(m_level + 1); //Levels are 1-30 but arrays are 0-indexed, so we add 1 purely for display
+	std::string linesStr = "Lines: " + std::to_string(m_lines);
+	m_renderer.drawText(width - 200, height / 2, lvlStr);
+	m_renderer.drawText(width - 200, height / 2 + 50, linesStr);
 }
 
-bool Game::isValidMove(Move move, u8 playerIndex) { //Can't move into the board or another piece
-	for (int x = 0; x < states[playerIndex]->piece->width; ++x) {
-		for (int y = 0; y < states[playerIndex]->piece->width; ++y) {
-			if (getPiece(x, y, states[playerIndex]->piece.get(), states[playerIndex]->rotation)) {
-				u8 bX = states[playerIndex]->xOffset + x;
-				u8 bY = states[playerIndex]->yOffset + y;
+bool Game::isValidMove(Move move, u8 playerIndex) { //Can't move into the m_board or another piece
+	std::unique_ptr<State>& state = m_states[playerIndex];
+	for (int x = 0; x < state->piece->width; ++x) {
+		for (int y = 0; y < state->piece->width; ++y) {
+			if (getPiece(x, y, state->piece, state->rotation)) {
+				u8 bX = state->xOffset + x;
+				u8 bY = state->yOffset + y;
 
-				if ((bX <= 0 || board[(bY * game_width + bX - 1)]) && move == Move::Left)
+				if ((bX <= 0 || m_board[(bY * game_width + bX - 1)]) && move == Move::Left)
 					return false;
-				if ((bX >= game_width - 1 || board[(bY * game_width + bX + 1)]) && move == Move::Right)
+				if ((bX >= game_width - 1 || m_board[(bY * game_width + bX + 1)]) && move == Move::Right)
 					return false;
 				if (bY >= game_height && move == Move::Down)
 					return false;
@@ -308,119 +319,125 @@ void Game::input() {
 			*/
 			if (event.key.code == sf::Keyboard::Right) {
 				if(isValidMove(Move::Right, playerOne))
-					++states[playerOne]->xOffset;
+					++m_states[playerOne]->xOffset;
 				break;
 			}
 			if (event.key.code == sf::Keyboard::Left) {
 				if(isValidMove(Move::Left, playerOne))
-					--states[playerOne]->xOffset;
+					--m_states[playerOne]->xOffset;
 				break;
 			}
 			if (event.key.code == sf::Keyboard::Down) {
 				if (isValidMove(Move::Down, playerOne))
-					++states[playerOne]->yOffset;
+					++m_states[playerOne]->yOffset;
 				break;
 			}
 			if (event.key.code == sf::Keyboard::Up) {
-				if (canWallKick((states[playerOne]->rotation + 1) % 4, playerOne)) {
-					states[playerOne]->rotation = (states[playerOne]->rotation + 1) % 4;
+				if (canWallKick((m_states[playerOne]->rotation + 1) % 4, playerOne)) {
+					m_states[playerOne]->rotation = (m_states[playerOne]->rotation + 1) % 4;
 						wallKick(playerOne);
 				}
 				break;
 			}
-			if (event.key.code == sf::Keyboard::Space) {
-				states[playerOne]->yOffset += getBottom(playerOne);
+			if (event.key.code == sf::Keyboard::PageDown) {
+				m_states[playerOne]->yOffset += getBottom(playerOne);
 				break;
 			}
 
 			/**
 			* Player Two Controls
 			*/
-			if (event.key.code == sf::Keyboard::D) {
-				if (isValidMove(Move::Right, playerTwo))
-					++states[playerTwo]->xOffset;
-				break;
-			}
-			if (event.key.code == sf::Keyboard::A) {
-				if (isValidMove(Move::Left, playerTwo))
-					--states[playerTwo]->xOffset;
-				break;
-			}
-			if (event.key.code == sf::Keyboard::S) {
-				if (isValidMove(Move::Down, playerTwo))
-					++states[playerTwo]->yOffset;
-				break;
-			}
-			if (event.key.code == sf::Keyboard::W) {
-				if (canWallKick((states[playerTwo]->rotation + 1) % 4, playerTwo)) {
-					states[playerTwo]->rotation = (states[playerTwo]->rotation + 1) % 4;
-					wallKick(playerTwo);
+			if (numPlayers >= 2) {
+				if (event.key.code == sf::Keyboard::D) {
+					if (isValidMove(Move::Right, playerTwo))
+						++m_states[playerTwo]->xOffset;
+					break;
 				}
-				break;
-			}
-			if (event.key.code == sf::Keyboard::R) {
-				states[playerTwo]->yOffset += getBottom(playerTwo);
-				break;
+				if (event.key.code == sf::Keyboard::A) {
+					if (isValidMove(Move::Left, playerTwo))
+						--m_states[playerTwo]->xOffset;
+					break;
+				}
+				if (event.key.code == sf::Keyboard::S) {
+					if (isValidMove(Move::Down, playerTwo))
+						++m_states[playerTwo]->yOffset;
+					break;
+				}
+				if (event.key.code == sf::Keyboard::W) {
+					if (canWallKick((m_states[playerTwo]->rotation + 1) % 4, playerTwo)) {
+						m_states[playerTwo]->rotation = (m_states[playerTwo]->rotation + 1) % 4;
+						wallKick(playerTwo);
+					}
+					break;
+				}
+				if (event.key.code == sf::Keyboard::R) {
+					m_states[playerTwo]->yOffset += getBottom(playerTwo);
+					break;
+				}
 			}
 
 			/**
 			* Player Three Controls
 			*/
-			if (event.key.code == sf::Keyboard::PageDown) {
-				if (isValidMove(Move::Right, playerThree))
-					++states[playerThree]->xOffset;
-				break;
-			}
-			if (event.key.code == sf::Keyboard::Delete) {
-				if (isValidMove(Move::Left, playerThree))
-					--states[playerThree]->xOffset;
-				break;
-			}
-			if (event.key.code == sf::Keyboard::End) {
-				if (isValidMove(Move::Down, playerThree))
-					++states[playerThree]->yOffset;
-				break;
-			}
-			if (event.key.code == sf::Keyboard::Home) {
-				if (canWallKick((states[playerThree]->rotation + 1) % 4, playerThree)) {
-					states[playerThree]->rotation = (states[playerThree]->rotation + 1) % 4;
-					wallKick(playerThree);
+			if (numPlayers >= 3) {
+				if (event.key.code == sf::Keyboard::L) {
+					if (isValidMove(Move::Right, playerThree))
+						++m_states[playerThree]->xOffset;
+					break;
 				}
-				break;
-			}
-			if (event.key.code == sf::Keyboard::PageUp) {
-				states[playerThree]->yOffset += getBottom(playerThree);
-				break;
+				if (event.key.code == sf::Keyboard::J) {
+					if (isValidMove(Move::Left, playerThree))
+						--m_states[playerThree]->xOffset;
+					break;
+				}
+				if (event.key.code == sf::Keyboard::K) {
+					if (isValidMove(Move::Down, playerThree))
+						++m_states[playerThree]->yOffset;
+					break;
+				}
+				if (event.key.code == sf::Keyboard::I) {
+					if (canWallKick((m_states[playerThree]->rotation + 1) % 4, playerThree)) {
+						m_states[playerThree]->rotation = (m_states[playerThree]->rotation + 1) % 4;
+						wallKick(playerThree);
+					}
+					break;
+				}
+				if (event.key.code == sf::Keyboard::P) {
+					m_states[playerThree]->yOffset += getBottom(playerThree);
+					break;
+				}
 			}
 
 			/**
 			* Player Four Controls
 			*/
-			if (event.key.code == sf::Keyboard::Numpad6) {
-				if (isValidMove(Move::Right, playerFour))
-					++states[playerFour]->xOffset;
-				break;
-			}
-			if (event.key.code == sf::Keyboard::Numpad4) {
-				if (isValidMove(Move::Left, playerFour))
-					--states[playerFour]->xOffset;
-				break;
-			}
-			if (event.key.code == sf::Keyboard::Numpad5) {
-				if (isValidMove(Move::Down, playerFour))
-					++states[playerFour]->yOffset;
-				break;
-			}
-			if (event.key.code == sf::Keyboard::Numpad8) {
-				if (canWallKick((states[playerFour]->rotation + 1) % 4, playerFour)) {
-					states[playerFour]->rotation = (states[playerFour]->rotation + 1) % 4;
-					wallKick(playerFour);
+			if (numPlayers == 4) {
+				if (event.key.code == sf::Keyboard::Numpad6) {
+					if (isValidMove(Move::Right, playerFour))
+						++m_states[playerFour]->xOffset;
+					break;
 				}
-				break;
-			}
-			if (event.key.code == sf::Keyboard::Numpad0) {
-				states[playerFour]->yOffset += getBottom(playerFour);
-				break;
+				if (event.key.code == sf::Keyboard::Numpad4) {
+					if (isValidMove(Move::Left, playerFour))
+						--m_states[playerFour]->xOffset;
+					break;
+				}
+				if (event.key.code == sf::Keyboard::Numpad5) {
+					if (isValidMove(Move::Down, playerFour))
+						++m_states[playerFour]->yOffset;
+					break;
+				}
+				if (event.key.code == sf::Keyboard::Numpad8) {
+					if (canWallKick((m_states[playerFour]->rotation + 1) % 4, playerFour)) {
+						m_states[playerFour]->rotation = (m_states[playerFour]->rotation + 1) % 4;
+						wallKick(playerFour);
+					}
+					break;
+				}
+				if (event.key.code == sf::Keyboard::Add) {
+					m_states[playerFour]->yOffset += getBottom(playerFour);
+					break;
+				}
 			}
 		}
 	}

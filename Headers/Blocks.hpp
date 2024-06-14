@@ -45,7 +45,7 @@ private:
 		0, 0, 1, 0,
 		0, 0, 1, 0
 	};
-	const std::vector<PieceState::Piece> blocks = {
+	const std::vector<PieceState::Piece> m_blocks = {
 		PieceState::Piece(oBlock, 2),
 		PieceState::Piece(sBlock, 3),
 		PieceState::Piece(zBlock, 3),
@@ -55,6 +55,6 @@ private:
 		PieceState::Piece(iBlock, 4)
 	};
 
-	std::random_device dev;
+	std::random_device m_dev;
 	std::mt19937 m_rng;
 };
