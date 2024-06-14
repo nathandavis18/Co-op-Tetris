@@ -4,7 +4,7 @@
 #include "../Headers/Game.hpp"
 
 
-Game::Game() : m_window(sf::VideoMode(width, height), "TETRIS"), m_renderer(&m_window) {
+Game::Game() : m_window(sf::VideoMode(totalWidth, totalHeight), "TETRIS"), m_renderer(&m_window) {
 	for (u8 i = 0; i < numPlayers; ++i) {
 		m_states[i] = std::make_unique<State>(State());
 		m_states[i]->nextPiece = std::make_unique<Piece>(m_blocks.getBlock());
@@ -38,7 +38,7 @@ void Game::newPiece(u8 playerIndex) {
 	m_states[playerIndex]->piece = std::move(m_states[playerIndex]->nextPiece); //Next piece becomes current piece
 	m_states[playerIndex]->nextPiece = std::make_unique<Piece>(m_blocks.getBlock()); //Next piece becomes a new piece
 
-	m_states[playerIndex]->xOffset = ((game_width * (playerIndex + 1)) / numPlayers) - 4;
+	m_states[playerIndex]->xOffset = ((gameWidth * (playerIndex + 1)) / numPlayers) - 4;
 	m_states[playerIndex]->yOffset = 0;
 	m_states[playerIndex]->rotation = 0;
 }
@@ -107,7 +107,7 @@ void Game::updateBoard(u8 playerIndex) { //Board gets updated when the playing p
 				s8 bX = state->xOffset + x;
 				s8 bY = state->yOffset + y;
 				if (bY >= 0)
-					m_board[bY * game_width + bX] = playerIndex + 1;
+					m_board[bY * gameWidth + bX] = playerIndex + 1;
 				else {
 					quit = true;
 				}
@@ -116,18 +116,18 @@ void Game::updateBoard(u8 playerIndex) { //Board gets updated when the playing p
 	}
 }
 bool Game::isFullRow(int y) {
-	for (int x = 0; x < game_width; ++x) { //Every tile in a given row
-		if (!m_board[y * game_width + x])//If a single spot in a row isn't a block we don't need to keep checking it
+	for (int x = 0; x < gameWidth; ++x) { //Every tile in a given row
+		if (!m_board[y * gameWidth + x])//If a single spot in a row isn't a block we don't need to keep checking it
 			return false;
 	}
 	return true;
 }
 void Game::clearLines() {
 	m_clearedLines = 0;
-	for (int y = 0; y < game_height; ++y) { //Every row
+	for (int y = 0; y < gameHeight; ++y) { //Every row
 		if (isFullRow(y)) {
-			for (int x = 0; x < game_width; ++x) {
-				m_board[y * game_width + x] = 0; //If its a full row, we clear it
+			for (int x = 0; x < gameWidth; ++x) {
+				m_board[y * gameWidth + x] = 0; //If its a full row, we clear it
 			}
 			++m_clearedLines;
 			m_yClearLevel = y;
@@ -136,8 +136,8 @@ void Game::clearLines() {
 	m_lines += m_clearedLines; //Updating total amount of lines cleared
 	while (m_clearedLines > 0) { //If we clear 1 line, we drop the rest of the m_board one time. Two times for 2 cleared lines, and so on
 		for (int y = m_yClearLevel; y > 0; --y) {
-			for (int x = 0; x < game_width; ++x) {
-				m_board[y * game_width + x] = m_board[(y - 1) * game_width + x];
+			for (int x = 0; x < gameWidth; ++x) {
+				m_board[y * gameWidth + x] = m_board[(y - 1) * gameWidth + x];
 			}
 		}
 		--m_clearedLines;
@@ -151,7 +151,7 @@ bool Game::hasCollided(u8 playerIndex) {
 			if (getPiece(x, y, state->piece, state->rotation)) {
 				u8 bX = state->xOffset + x;
 				u8 bY = state->yOffset + y;
-				if (bY >= 0 && (m_board[bY * game_width + bX] >= 1 || bY >= game_height)) {
+				if (bY >= 0 && (m_board[bY * gameWidth + bX] >= 1 || bY >= gameHeight)) {
 					return true;
 				}
 			}
@@ -160,7 +160,7 @@ bool Game::hasCollided(u8 playerIndex) {
 	return false;
 }
 bool Game::hasLost() {
-	for (int x = 0; x < game_width; ++x) {
+	for (int x = 0; x < gameWidth; ++x) {
 		if (m_board[x]) //If there is a piece on the top row, then we lose
 			return true;
 	}
@@ -174,7 +174,7 @@ bool Game::canWallKick(u8 rotation, u8 playerIndex) {
 			if (getPiece(x, y, state->piece, rotation)) {
 				s8 bX = state->xOffset + x;
 				s8 bY = state->yOffset + y;
-				if (m_board[bY * game_width + bX]) {
+				if (m_board[bY * gameWidth + bX]) {
 					return false;
 				}
 			}
@@ -192,10 +192,10 @@ void Game::wallKick(u8 playerIndex) {
 				if (bX < 0) {
 					state->xOffset -= bX;
 				}
-				if (bX >= game_width) {
-					state->xOffset -= (bX - game_width) + 1;
+				if (bX >= gameWidth) {
+					state->xOffset -= (bX - gameWidth) + 1;
 				}
-				if (bY >= game_height) {
+				if (bY >= gameHeight) {
 					--state->yOffset;
 				}
 			}
@@ -205,7 +205,7 @@ void Game::wallKick(u8 playerIndex) {
 
 u8 Game::getBottom(u8 playerIndex, bool ghost) {
 	u8 checkAmount;
-	u8 finalAmount = game_height;
+	u8 finalAmount = gameHeight;
 	std::unique_ptr<State>& state = m_states[playerIndex];
 	for (int x = 0; x < state->piece->width; ++x) {
 		for (int y = 0; y < state->piece->width; ++y) {
@@ -213,7 +213,7 @@ u8 Game::getBottom(u8 playerIndex, bool ghost) {
 				checkAmount = 0;
 				s8 bX = state->xOffset + x;
 				s8 bY = state->yOffset + y + ghost; //If we are getting the ghost piece, it is 1 value higher
-				while (m_board[bY * game_width + bX] < 1 && bY < game_height) {
+				while (m_board[bY * gameWidth + bX] < 1 && bY < gameHeight) {
 					++checkAmount;
 					++bY;
 				}
@@ -262,30 +262,30 @@ void Game::renderPiece(PieceToDraw piece, u8 playerIndex, u8 yAmount) {
 }
 void Game::renderBoard() { //Draws all pieces that are currently on the m_board
 
-	for (int x = 0; x < game_width; ++x) {
-		for (int y = 0; y < game_height; ++y) {
-			if (m_board[y * game_width + x]) {
-				PlayerColor* playerColor = &m_playerColors[m_board[y * game_width + x] - 1];
+	for (int x = 0; x < gameWidth; ++x) {
+		for (int y = 0; y < gameHeight; ++y) {
+			if (m_board[y * gameWidth + x]) {
+				PlayerColor* playerColor = &m_playerColors[m_board[y * gameWidth + x] - 1];
 				m_renderer.draw(x + boardXOffset, y + boardYOffset, playerColor->fillColor, sf::Color::White);
 			}
 		}
 	}
 }
 void Game::renderBorder() { //Draws the border around the playable area
-	for (int x = 7; x < game_width + 9; ++x) {
+	for (int x = 7; x < gameWidth + 9; ++x) {
 		m_renderer.draw(x, 0, sf::Color::White, sf::Color::Blue);
-		m_renderer.draw(x, game_height + 1, sf::Color::White, sf::Color::Blue);
+		m_renderer.draw(x, gameHeight + 1, sf::Color::White, sf::Color::Blue);
 	}
-	for (int y = 0; y < game_height + 1; ++y) {
+	for (int y = 0; y < gameHeight + 1; ++y) {
 		m_renderer.draw(7, y, sf::Color::White, sf::Color::Blue);
-		m_renderer.draw(game_width + 8, y, sf::Color::White, sf::Color::Blue);
+		m_renderer.draw(gameWidth + 8, y, sf::Color::White, sf::Color::Blue);
 	}
 }
 void Game::renderText() {
 	std::string lvlStr = "Level: " + std::to_string(m_level + 1); //Levels are 1-30 but arrays are 0-indexed, so we add 1 purely for display
 	std::string linesStr = "Lines: " + std::to_string(m_lines);
-	m_renderer.drawText(width - 200, height / 2, lvlStr);
-	m_renderer.drawText(width - 200, height / 2 + 50, linesStr);
+	m_renderer.drawText(totalWidth - 200, totalHeight / 2, lvlStr);
+	m_renderer.drawText(totalWidth - 200, totalHeight / 2 + 50, linesStr);
 }
 
 bool Game::isValidMove(Move move, u8 playerIndex) { //Can't move into the m_board or another piece
@@ -296,11 +296,11 @@ bool Game::isValidMove(Move move, u8 playerIndex) { //Can't move into the m_boar
 				u8 bX = state->xOffset + x;
 				u8 bY = state->yOffset + y;
 
-				if ((bX <= 0 || m_board[(bY * game_width + bX - 1)]) && move == Move::Left)
+				if ((bX <= 0 || m_board[(bY * gameWidth + bX - 1)]) && move == Move::Left)
 					return false;
-				if ((bX >= game_width - 1 || m_board[(bY * game_width + bX + 1)]) && move == Move::Right)
+				if ((bX >= gameWidth - 1 || m_board[(bY * gameWidth + bX + 1)]) && move == Move::Right)
 					return false;
-				if (bY >= game_height && move == Move::Down)
+				if (bY >= gameHeight && move == Move::Down)
 					return false;
 			}
 		}

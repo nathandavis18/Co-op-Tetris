@@ -20,8 +20,8 @@ void Renderer::draw(const int x, const int y, const sf::Color fill, const sf::Co
 	rect.setOutlineColor(outline);
 	rect.setOutlineThickness(1);
 	
-	rect.setSize(sf::Vector2f(size, size));
-	rect.setPosition(x * size, y * size);
+	rect.setSize(sf::Vector2f(pieceSize, pieceSize));
+	rect.setPosition(x * pieceSize, y * pieceSize);
 	
 	m_window->draw(rect);
 }

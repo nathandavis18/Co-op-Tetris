@@ -48,7 +48,7 @@ private:
 	void restart();
 
 private:
-	std::array<u16, game_width * board_height> m_board;
+	std::array<u16, gameWidth * boardHeight> m_board;
 	std::array<PlayerColor, numPlayers> m_playerColors;
 	u8 m_level = 0;
 	u32 m_lines = m_level * linesToNextLevel;
