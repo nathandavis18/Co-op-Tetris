@@ -1,4 +1,5 @@
 #include <string>
+#include <iostream>
 
 #include "../Headers/Game.hpp"
 
@@ -444,7 +445,51 @@ void Game::input() {
 					restart();
 				}
 			}
+			break;
+
+		/*
+		* Having a controller for the 4th person might be easier.
+		*/
+		case sf::Event::EventType::JoystickMoved:
+			if (numPlayers == 4) {
+				if (sf::Joystick::isConnected(0)) {
+					if (sf::Joystick::getAxisPosition(0, sf::Joystick::PovX) == 100) {
+						if (isValidMove(Move::Right, playerFour))
+							++m_states[playerFour]->xOffset;
+						break;
+					}
+					if (sf::Joystick::getAxisPosition(0, sf::Joystick::PovX) == -100) {
+						if (isValidMove(Move::Left, playerFour))
+							--m_states[playerFour]->xOffset;
+						break;
+					}
+					if (sf::Joystick::getAxisPosition(0, sf::Joystick::PovY) == -100) {
+						if (isValidMove(Move::Down, playerFour))
+							++m_states[playerFour]->yOffset;
+						break;
+					}
+				}
+			}
+			break;
+
+		case sf::Event::EventType::JoystickButtonPressed:
+			if (numPlayers == 4) {
+				if (sf::Joystick::isConnected(0)) {
+					if (sf::Joystick::isButtonPressed(0, 3)) {
+						if (canWallKick((m_states[playerFour]->rotation + 1) % 4, playerFour)) {
+							m_states[playerFour]->rotation = (m_states[playerFour]->rotation + 1) % 4;
+							wallKick(playerFour);
+						}
+						break;
+					}
+					if (sf::Joystick::isButtonPressed(0, 2)) {
+						m_states[playerFour]->yOffset += getBottom(playerFour);
+						break;
+					}
+				}
+			}
 		}
+
 	}
 }
 
