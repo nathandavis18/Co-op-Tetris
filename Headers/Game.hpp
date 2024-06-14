@@ -45,6 +45,8 @@ private:
 		sf::Color ghostFillColor;
 	};
 
+	void restart();
+
 private:
 	std::array<u16, game_width * board_height> m_board;
 	std::array<PlayerColor, numPlayers> m_playerColors;

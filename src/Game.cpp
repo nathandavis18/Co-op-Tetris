@@ -439,6 +439,32 @@ void Game::input() {
 					break;
 				}
 			}
+			if (quit) {
+				if (event.key.code == sf::Keyboard::F5) {
+					restart();
+				}
+			}
 		}
 	}
+}
+
+void Game::restart() {
+	quit = false;
+	m_lines = 0;
+	m_clearedLines = 0;
+	m_level = 0;
+	m_yClearLevel = 0;
+	m_timeToNextDrop = m_framesPerDrop[m_level] / framesPerSecond;
+	for (u8 i = 0; i < numPlayers; ++i) {
+		m_states[i]->piece.get_deleter();
+		m_states[i]->nextPiece.get_deleter();
+	}
+	for (u8 i = 0; i < numPlayers; ++i) {
+		m_states[i]->nextPiece = std::make_unique<Piece>(m_blocks.getBlock());
+		newPiece(i);
+	}
+	std::fill(m_board.begin(), m_board.end(), 0);
+	m_time = sf::milliseconds(m_timeToNextDrop * 1000);
+	getLevel();
+	loop();
 }
