@@ -5,6 +5,7 @@
 #include "PieceState.hpp"
 #include "Blocks.hpp"
 #include "Renderer.hpp"
+#include "MusicController.hpp"
 
 using State = PieceState::State;
 using Piece = PieceState::Piece;
@@ -63,6 +64,7 @@ private:
 
 	sf::RenderWindow m_window;
 	Renderer m_renderer;
+	MusicController m_musicController;
 
 	std::array<std::unique_ptr<State>, numPlayers> m_states;
 	Blocks m_blocks;

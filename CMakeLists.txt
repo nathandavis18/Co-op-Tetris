@@ -14,17 +14,18 @@ set(SOURCES src/main.cpp
 			src/Game.cpp
 			src/Blocks.cpp
 			src/Renderer.cpp
-)
+            src/MusicController.cpp)
 
 set(HEADERS Headers/Blocks.hpp
 			Headers/PieceState.hpp
 			Headers/Game.hpp
 			Headers/Globals.hpp
-			Headers.Renderer.hpp
+			Headers/Renderer.hpp
+            Headers/MusicController.hpp
 )
 
-add_executable (Tetris ${SOURCES})
-target_link_libraries(Tetris PRIVATE sfml-graphics)
+add_executable (Tetris ${SOURCES} ${HEADERS})
+target_link_libraries(Tetris PRIVATE sfml-graphics sfml-audio)
 target_compile_features(Tetris PRIVATE cxx_std_17)
 
 if(WIN32)

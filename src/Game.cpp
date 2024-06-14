@@ -31,6 +31,7 @@ Game::Game() : m_window(sf::VideoMode(totalWidth, totalHeight), "TETRIS"), m_ren
 	}
 	std::fill(m_board.begin(), m_board.end(), 0);
 	m_time = sf::milliseconds(m_timeToNextDrop * 1000);
+	m_musicController.startMusic();
 	getLevel();
 	loop();
 }
@@ -161,8 +162,10 @@ bool Game::hasCollided(u8 playerIndex) {
 }
 bool Game::hasLost() {
 	for (int x = 0; x < gameWidth; ++x) {
-		if (m_board[x]) //If there is a piece on the top row, then we lose
+		if (m_board[x]) {//If there is a piece on the top row, then we lose
+			m_musicController.stopMusic();
 			return true;
+		}
 	}
 	return false;
 }
@@ -510,6 +513,7 @@ void Game::restart() {
 	}
 	std::fill(m_board.begin(), m_board.end(), 0);
 	m_time = sf::milliseconds(m_timeToNextDrop * 1000);
+	m_musicController.startMusic();
 	getLevel();
 	loop();
 }
