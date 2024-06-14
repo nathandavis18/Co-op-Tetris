@@ -13,7 +13,7 @@ using s32 = std::int32_t;
 
 static bool quit = false;
 
-static constexpr u8 numPlayers = 3;
+static constexpr u8 numPlayers = 4;
 static constexpr int game_width = 10 + ((numPlayers - 1) * 3.4);
 static constexpr int game_height = 20;
 static constexpr int board_height = 22;

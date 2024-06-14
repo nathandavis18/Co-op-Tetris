@@ -1,5 +1,7 @@
 # Co-Op Tetris
 
+![Gameplay Demo Image](Images/Gameplay.png?raw=true "Gameplay")
+
 This is a multiplayer version of Tetris that supports up to 4 players! Game is playable, though to change the controls and number of players you currently have to change them directly in the code.
 
 The game m_board size scales with the number of players, so 1 player is normal tetris size, 2 players is slightly bigger, etc.
