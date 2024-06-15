@@ -4,6 +4,10 @@
 #include "../Headers/Game.hpp"
 
 
+/// <summary>
+/// Initialzer for the Game class
+/// Initializes the window, renderer, and input controller, and sets the game up.
+/// </summary>
 Game::Game() : m_window(sf::VideoMode(totalWidth, totalHeight), "TETRIS"), m_renderer(&m_window), m_inputController(InputController(&m_window)) {
 	for (u8 i = 0; i < numPlayers; ++i) {
 		m_states[i] = std::make_unique<State>(State());
@@ -31,9 +35,14 @@ Game::Game() : m_window(sf::VideoMode(totalWidth, totalHeight), "TETRIS"), m_ren
 	}
 	std::fill(m_board.begin(), m_board.end(), 0);
 	m_musicController.startMusic();
-	getLevel();
+	updateLevel();
 	loop();
 }
+
+/// <summary>
+/// Generates a new piece for the player(s) that have had their piece collide with the board
+/// </summary>
+/// <param name="playerIndex">The current player that needs a new piece</param>
 void Game::newPiece(u8 playerIndex) {
 	m_states[playerIndex]->piece = std::make_unique<Piece>(m_blocks.getBlock());
 
@@ -41,6 +50,15 @@ void Game::newPiece(u8 playerIndex) {
 	m_states[playerIndex]->yOffset = 0;
 	m_states[playerIndex]->rotation = 0;
 }
+
+/// <summary>
+/// Gets the data at the current position, doing some math to turn a 1d vector into a 2d vector
+/// </summary>
+/// <param name="x">The x position of the piece</param>
+/// <param name="y">The y position of the piece</param>
+/// <param name="p">The piece</param>
+/// <param name="rotation">The piece's rotation, or the rotation to check if checking for rotation validity</param>
+/// <returns>Returns false if the data is 0, true if data is greater than 0</returns>
 bool Game::getPiece(u8 x, u8 y, std::unique_ptr<Piece>& p, u8 rotation) {
 	switch (rotation) {
 	case 0:
@@ -56,6 +74,9 @@ bool Game::getPiece(u8 x, u8 y, std::unique_ptr<Piece>& p, u8 rotation) {
 	}
 }
 
+/// <summary>
+/// The main game loop. Calls all necessary functions depending on the state of the game
+/// </summary>
 void Game::loop() {
 	while (!quit && m_window.isOpen()) {
 		input();
@@ -67,7 +88,7 @@ void Game::loop() {
 					updateBoard(playerIndex);
 					clearLines();
 					quit = hasLost();
-					getLevel();
+					updateLevel();
 					newPiece(playerIndex);
 				}
 				else {
@@ -89,16 +110,30 @@ void Game::loop() {
 		m_renderer.showRenderer();
 	}
 }
-void Game::getLevel() {
+
+/// <summary>
+/// Updates the level based on the amount of lines cleared
+/// </summary>
+void Game::updateLevel() {
 	m_level = m_lines / 10;
 	if (m_level > 29) {
 		m_level = 29; //Level 29 (30 if not 0 indexing) is the max m_level
 	}
 }
+
+/// <summary>
+/// Sets the time for the current player for the next automatic drop of their piece
+/// </summary>
+/// <param name="playerIndex">The current player</param>
 void Game::setTimeNextDrop(u8 playerIndex) {
 	m_timeToNextDrop = m_framesPerDrop[m_level] / framesPerSecond;
 	m_times[playerIndex] = sf::milliseconds(m_timeToNextDrop * 1000);
 }
+
+/// <summary>
+/// Adds the dropped piece to the board. Uses the player index in order to maintain piece color
+/// </summary>
+/// <param name="playerIndex">The current player</param>
 void Game::updateBoard(u8 playerIndex) { //Board gets updated when the playing piece collides with the m_board
 	std::unique_ptr<State>& state = m_states[playerIndex];
 	for (int x = 0; x < state->piece->width; ++x) {
@@ -115,6 +150,13 @@ void Game::updateBoard(u8 playerIndex) { //Board gets updated when the playing p
 		}
 	}
 }
+
+/// <summary>
+/// Checks if the current row is full, starting from left to right.
+/// Returns false if any piece in the row is not filled
+/// </summary>
+/// <param name="y">The row to check</param>
+/// <returns></returns>
 bool Game::isFullRow(int y) {
 	for (int x = 0; x < gameWidth; ++x) { //Every tile in a given row
 		if (!m_board[y * gameWidth + x])//If a single spot in a row isn't a block we don't need to keep checking it
@@ -122,6 +164,10 @@ bool Game::isFullRow(int y) {
 	}
 	return true;
 }
+
+/// <summary>
+/// Clears any lines that are full and moves the rows above it down.
+/// </summary>
 void Game::clearLines() {
 	m_clearedLines = 0;
 	for (int y = 0; y < gameHeight; ++y) { //Every row
@@ -144,6 +190,11 @@ void Game::clearLines() {
 	}
 }
 
+/// <summary>
+/// Checks if the current player's piece has collided with the board.
+/// </summary>
+/// <param name="playerIndex">The current player</param>
+/// <returns></returns>
 bool Game::hasCollided(u8 playerIndex) {
 	std::unique_ptr<State>& state = m_states[playerIndex];
 	for (int x = 0; x < state->piece->width; ++x) {
@@ -159,6 +210,12 @@ bool Game::hasCollided(u8 playerIndex) {
 	}
 	return false;
 }
+
+/// <summary>
+/// Checks if the top row contains a piece. If so, the player has lost.
+/// This method is called after clearLines in the game loop.
+/// </summary>
+/// <returns></returns>
 bool Game::hasLost() {
 	for (int x = 0; x < gameWidth; ++x) {
 		if (m_board[x]) {//If there is a piece on the top row, then we lose
@@ -169,6 +226,12 @@ bool Game::hasLost() {
 	return false;
 }
 
+/// <summary>
+/// Checks if when the player rotates the piece can be pushed or not by checking collision above and to the sides of it.
+/// </summary>
+/// <param name="rotation">The rotation to check</param>
+/// <param name="playerIndex">The player's piece to check</param>
+/// <returns></returns>
 bool Game::canWallKick(u8 rotation, u8 playerIndex) {
 	std::unique_ptr<State>& state = m_states[playerIndex];
 	for (int x = 0; x < state->piece->width; ++x) {
@@ -184,6 +247,11 @@ bool Game::canWallKick(u8 rotation, u8 playerIndex) {
 	}
 	return true;
 }
+
+/// <summary>
+/// Pushes the piece away from the wall if it can.
+/// </summary>
+/// <param name="playerIndex">The current player's piece</param>
 void Game::wallKick(u8 playerIndex) {
 	std::unique_ptr<State>& state = m_states[playerIndex];
 	for (int x = 0; x < state->piece->width; ++x) {
@@ -205,6 +273,12 @@ void Game::wallKick(u8 playerIndex) {
 	}
 }
 
+/// <summary>
+/// Finds the highest point of collision directly below the player's piece. 
+/// Used for drawing the ghost piece and for hard drops
+/// </summary>
+/// <param name="playerIndex">The current player's piece</param>
+/// <returns>The amount that the piece can go down</returns>
 u8 Game::getBottom(u8 playerIndex) {
 	u8 checkAmount;
 	u8 finalAmount = gameHeight;
@@ -227,7 +301,10 @@ u8 Game::getBottom(u8 playerIndex) {
 	}
 	return finalAmount;
 }
-//Sends everything to the renderer to be drawn
+
+/// <summary>
+/// The main function to call all child functions responsible for sending data to the renderer. 
+/// </summary>
 void Game::renderGame() {
 	m_renderer.clearRenderer();
 
@@ -243,8 +320,14 @@ void Game::renderGame() {
 
 	m_renderer.showRenderer();
 }
-//Draws the piece you are playing, the ghost piece for hard-drop accuracy, and the upcoming piece
-void Game::renderPiece(PieceToDraw piece, u8 playerIndex, u8 yAmount) {
+
+/// <summary>
+/// Sends the player's current piece and the ghost piece associated with their piece to the renderer.
+/// </summary>
+/// <param name="piece">What type of piece needs to be drawn (NormalPiece/GhostPiece)</param>
+/// <param name="playerIndex">The player's piece to draw</param>
+/// <param name="ghostPieceOffset">The offset between the player's piece and their ghost piece</param>
+void Game::renderPiece(PieceToDraw piece, u8 playerIndex, u8 ghostPieceOffset) {
 	std::unique_ptr<State>& state = m_states[playerIndex];
 	PlayerColor* playerColor = &m_playerColors[playerIndex];
 	for (int y = 0; y < state->piece->width; ++y) {
@@ -255,15 +338,18 @@ void Game::renderPiece(PieceToDraw piece, u8 playerIndex, u8 yAmount) {
 					m_renderer.draw(x + state->xOffset + boardXOffset, y + state->yOffset + boardYOffset, playerColor->fillColor, sf::Color::White);
 					break;
 				case PieceToDraw::GhostPiece:
-					m_renderer.draw(x + state->xOffset + boardXOffset, y + state->yOffset + boardYOffset + yAmount, playerColor->ghostFillColor, ghostOutlineColor);
+					m_renderer.draw(x + state->xOffset + boardXOffset, y + state->yOffset + boardYOffset + ghostPieceOffset, playerColor->ghostFillColor, ghostOutlineColor);
 					break;
 				}
 			}
 		}
 	}
 }
-void Game::renderBoard() { //Draws all pieces that are currently on the m_board
 
+/// <summary>
+/// Sends the board to the renderer to be drawn
+/// </summary>
+void Game::renderBoard() {
 	for (int x = 0; x < gameWidth; ++x) {
 		for (int y = 0; y < gameHeight; ++y) {
 			if (m_board[y * gameWidth + x]) {
@@ -273,7 +359,11 @@ void Game::renderBoard() { //Draws all pieces that are currently on the m_board
 		}
 	}
 }
-void Game::renderBorder() { //Draws the border around the playable area
+
+/// <summary>
+/// Sends the border around the playable area to be drawn
+/// </summary>
+void Game::renderBorder() {
 	for (int x = 7; x < gameWidth + 9; ++x) {
 		m_renderer.draw(x, 0, sf::Color::White, sf::Color::Blue);
 		m_renderer.draw(x, gameHeight + 1, sf::Color::White, sf::Color::Blue);
@@ -283,13 +373,23 @@ void Game::renderBorder() { //Draws the border around the playable area
 		m_renderer.draw(gameWidth + 8, y, sf::Color::White, sf::Color::Blue);
 	}
 }
+
+/// <summary>
+/// Sends the level information and the lines information to the renderer to be displayed
+/// </summary>
 void Game::renderText() {
-	std::string lvlStr = "Level: " + std::to_string(m_level + 1); //Levels are 1-30 but arrays are 0-indexed, so we add 1 purely for display
+	std::string lvlStr = "Level: " + std::to_string(m_level + 1); //Levels are 1-30 but arrays are 0-indexed, so add 1 purely for display
 	std::string linesStr = "Lines: " + std::to_string(m_lines);
 	m_renderer.drawText(totalWidth - 200, totalHeight / 2, lvlStr);
 	m_renderer.drawText(totalWidth - 200, totalHeight / 2 + 50, linesStr);
 }
 
+/// <summary>
+/// Checks if a given move is valid. Does not allow player to move outside the board, or into another piece on the board.
+/// </summary>
+/// <param name="move">The move needing to be checked</param>
+/// <param name="playerIndex">The player making the move</param>
+/// <returns></returns>
 bool Game::isValidMove(Move move, u8 playerIndex) { //Can't move into the m_board or another piece
 	std::unique_ptr<State>& state = m_states[playerIndex];
 	for (int x = 0; x < state->piece->width; ++x) {
@@ -309,10 +409,19 @@ bool Game::isValidMove(Move move, u8 playerIndex) { //Can't move into the m_boar
 	}
 	return true;
 }
+
+/// <summary>
+/// Method used for hard dropping a piece
+/// </summary>
+/// <param name="playerIndex">The player dropping the piece</param>
 void Game::dropPiece(u8 playerIndex) {
 	m_states[playerIndex]->yOffset += getBottom(playerIndex);
 	m_times[playerIndex] = sf::milliseconds(0);
 }
+
+/// <summary>
+/// Gets the input from the input controller and updates the game accordingly
+/// </summary>
 void Game::input() {
 	PlayerMove pm = m_inputController.input();
 	switch (pm.move) {
@@ -351,6 +460,9 @@ void Game::input() {
 	}
 }
 
+/// <summary>
+/// Resets the game to the starting point. Can only be called after player(s) lost.
+/// </summary>
 void Game::restart() {
 	quit = false;
 	m_lines = 0;
@@ -367,6 +479,6 @@ void Game::restart() {
 	}
 	std::fill(m_board.begin(), m_board.end(), 0);
 	m_musicController.startMusic();
-	getLevel();
+	updateLevel();
 	loop();
 }

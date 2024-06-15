@@ -5,6 +5,9 @@
 #include "Globals.hpp"
 #include "PieceState.hpp"
 
+/// <summary>
+/// This class abstracts the tetris block data away from the Game class
+/// </summary>
 class Blocks {
 public:
 	Blocks();

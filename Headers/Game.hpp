@@ -11,15 +11,18 @@
 using State = PieceState::State;
 using Piece = PieceState::Piece;
 
+/// <summary>
+/// The Game Engine class.
+/// Controls all events of the game, handing information off to/requesting information from other classes as needed
+/// </summary>
 class Game{
-	sf::Event event{};
 public:
 	Game();
 	void newPiece(u8 playerIndex);
 	bool getPiece(u8 x, u8 y, std::unique_ptr<Piece>&, u8 rotation);
 	
 	void loop();
-	void getLevel();
+	void updateLevel();
 	void setTimeNextDrop(u8 playerIndex);
 	void updateBoard(u8 playerIndex);
 	bool isFullRow(int y);
@@ -39,7 +42,7 @@ public:
 	void renderGame();
 	void renderBoard();
 	void renderBorder();
-	void renderPiece(PieceToDraw piece, u8 playerIndex, u8 yAmount = 0);
+	void renderPiece(PieceToDraw piece, u8 playerIndex, u8 ghostPieceOffset = 0);
 	void renderText();
 
 private:

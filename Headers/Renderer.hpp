@@ -2,8 +2,10 @@
 #include <string>
 #include <SFML/Graphics.hpp>
 
-class Renderer
-{
+/// <summary>
+/// This class abstracts the rendering information away from the Game class
+/// </summary>
+class Renderer{
 public:
 	const Renderer(sf::RenderWindow* window);
 	void clearRenderer();

@@ -8,8 +8,12 @@ using s8 = std::int8_t;
 using s16 = std::int16_t;
 using s32 = std::int32_t;
 
-enum class Move{Left, Right, Down, Rotate, HardDrop, PlayAgain, Default};
-enum class PieceToDraw{NormalPiece, GhostPiece, NextPiece};
+/**
+* This header defines global variables used by multiple/all other classes.
+* Also defines the typedefs above.
+*/
+enum class Move{Left, Right, Down, Rotate, HardDrop, PlayAgain, None};
+enum class PieceToDraw{NormalPiece, GhostPiece};
 
 struct PlayerMove {
 	Move move;
