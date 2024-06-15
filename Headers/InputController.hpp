@@ -9,7 +9,7 @@
 class InputController {
 public:
 	InputController(sf::Window*);
-	PlayerMove input();
+	PlayerMove input(bool = false);
 private:
 	sf::Event m_event;
 	sf::Window* m_window;

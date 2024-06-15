@@ -423,7 +423,7 @@ void Game::dropPiece(u8 playerIndex) {
 /// Gets the input from the input controller and updates the game accordingly
 /// </summary>
 void Game::input() {
-	PlayerMove pm = m_inputController.input();
+	PlayerMove pm = m_inputController.input(quit);
 	switch (pm.move) {
 	case Move::Right:
 		if (isValidMove(Move::Right, pm.player))

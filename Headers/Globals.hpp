@@ -23,6 +23,7 @@ struct PlayerMove {
 static bool quit = false;
 
 static constexpr u8 numPlayers = 4;
+
 static constexpr int gameWidth = 10 + ((numPlayers - 1) * 3.4);
 static constexpr int gameHeight = 20;
 static constexpr int boardHeight = 22;

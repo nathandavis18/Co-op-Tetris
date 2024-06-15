@@ -13,7 +13,7 @@ InputController::InputController(sf::Window* window) : m_window(window), m_event
 /// This method completely abstracts the sf::Event information away from the Game class
 /// </summary>
 /// <returns>Returns the move to make and which player made the move</returns>
-PlayerMove InputController::input() {
+PlayerMove InputController::input(bool quit) {
 	PlayerMove pm;
 	pm.move = Move::None;
 
@@ -21,7 +21,8 @@ PlayerMove InputController::input() {
 		switch (m_event.type) {
 		case sf::Event::Closed:
 			m_window->close();
-			return pm;
+			break;
+
 		case sf::Event::EventType::KeyPressed:
 			/**
 			* Player One Controls
@@ -29,36 +30,32 @@ PlayerMove InputController::input() {
 			if (m_event.key.code == sf::Keyboard::Right) {
 				pm.move = Move::Right;
 				pm.player = playerOne;
-				return pm;
+				break;
 			}
 			if (m_event.key.code == sf::Keyboard::Left) {
 				pm.move = Move::Left;
 				pm.player = playerOne;
-				return pm;
+				break;
 			}
 			if (m_event.key.code == sf::Keyboard::Down) {
 				pm.move = Move::Down;
 				pm.player = playerOne;
-				return pm;
+				break;
 			}
 			if (m_event.key.code == sf::Keyboard::Up) {
 				pm.move = Move::Rotate;
 				pm.player = playerOne;
+				break;
+			}
+			if (m_event.key.code == sf::Keyboard::Space && numPlayers == 1) {
+				pm.move = Move::HardDrop;
+				pm.player = playerOne;
 				return pm;
 			}
-			if (numPlayers == 1) { //If playing in single player mode, use Space for convenience. Otherwise, use Page Down to conserve space on the keyboard
-				if (m_event.key.code == sf::Keyboard::Space) {
-					pm.move = Move::HardDrop;
-					pm.player = playerOne;
-					return pm;
-				}
-			}
-			else {
-				if (m_event.key.code == sf::Keyboard::PageDown) {
-					pm.move = Move::HardDrop;
-					pm.player = playerOne;
-					return pm;
-				}
+			if (m_event.key.code == sf::Keyboard::PageDown && numPlayers > 1) {
+				pm.move = Move::HardDrop;
+				pm.player = playerOne;
+				break;
 			}
 
 			/**
@@ -68,27 +65,27 @@ PlayerMove InputController::input() {
 				if (m_event.key.code == sf::Keyboard::D) {
 					pm.move = Move::Right;
 					pm.player = playerTwo;
-					return pm;
+					break;
 				}
 				if (m_event.key.code == sf::Keyboard::A) {
 					pm.move = Move::Left;
 					pm.player = playerTwo;
-					return pm;
+					break;
 				}
 				if (m_event.key.code == sf::Keyboard::S) {
 					pm.move = Move::Down;
 					pm.player = playerTwo;
-					return pm;
+					break;
 				}
 				if (m_event.key.code == sf::Keyboard::W) {
 					pm.move = Move::Rotate;
 					pm.player = playerTwo;
-					return pm;
+					break;
 				}
 				if (m_event.key.code == sf::Keyboard::R) {
 					pm.move = Move::HardDrop;
 					pm.player = playerTwo;
-					return pm;
+					break;
 				}
 			}
 
@@ -99,27 +96,27 @@ PlayerMove InputController::input() {
 				if (m_event.key.code == sf::Keyboard::L) {
 					pm.move = Move::Right;
 					pm.player = playerThree;
-					return pm;
+					break;
 				}
 				if (m_event.key.code == sf::Keyboard::J) {
 					pm.move = Move::Left;
 					pm.player = playerThree;
-					return pm;
+					break;
 				}
 				if (m_event.key.code == sf::Keyboard::K) {
 					pm.move = Move::Down;
 					pm.player = playerThree;
-					return pm;
+					break;
 				}
 				if (m_event.key.code == sf::Keyboard::I) {
 					pm.move = Move::Rotate;
 					pm.player = playerThree;
-					return pm;
+					break;
 				}
 				if (m_event.key.code == sf::Keyboard::P) {
 					pm.move = Move::HardDrop;
 					pm.player = playerThree;
-					return pm;
+					break;
 				}
 			}
 
@@ -130,35 +127,37 @@ PlayerMove InputController::input() {
 				if (m_event.key.code == sf::Keyboard::Numpad6) {
 					pm.move = Move::Right;
 					pm.player = playerFour;
-					return pm;
+					break;
 				}
 				if (m_event.key.code == sf::Keyboard::Numpad4) {
 					pm.move = Move::Left;
 					pm.player = playerFour;
-					return pm;
+					break;
 				}
 				if (m_event.key.code == sf::Keyboard::Numpad5) {
 					pm.move = Move::Down;
 					pm.player = playerFour;
+					break;
 				}
 				if (m_event.key.code == sf::Keyboard::Numpad8) {
 					pm.move = Move::Rotate;
 					pm.player = playerFour;
-					return pm;
+					break;
 				}
 				if (m_event.key.code == sf::Keyboard::Add) {
 					pm.move = Move::HardDrop;
 					pm.player = playerFour;
-					return pm;
+					break;
 				}
 			}
 
-			if (quit) {
+  			if (quit) {
 				if (m_event.key.code == sf::Keyboard::F5) {
 					pm.move = Move::PlayAgain;
+					return pm;
 				}
 			}
-			return pm;
+			break;
 
 		/*
 		* Having a controller for the 4th person might be easier.
@@ -169,21 +168,21 @@ PlayerMove InputController::input() {
 					if (sf::Joystick::getAxisPosition(0, sf::Joystick::PovX) == 100) {
 						pm.move = Move::Right;
 						pm.player = playerFour;
-						return pm;
+						break;
 					}
 					if (sf::Joystick::getAxisPosition(0, sf::Joystick::PovX) == -100) {
 						pm.move = Move::Left;
 						pm.player = playerFour;
-						return pm;
+						break;
 					}
 					if (sf::Joystick::getAxisPosition(0, sf::Joystick::PovY) == -100) {
 						pm.move = Move::Down;
 						pm.player = playerFour;
-						return pm;
+						break;
 					}
 				}
 			}
-			return pm;
+			break;
 
 		case sf::Event::EventType::JoystickButtonPressed: // X/A on the controller
 			if (numPlayers == 4) {
@@ -191,20 +190,20 @@ PlayerMove InputController::input() {
 					if (sf::Joystick::isButtonPressed(0, 3)) {
 						pm.move = Move::Rotate;
 						pm.player = playerFour;
-						return pm;
+						break;
 					}
 					if (sf::Joystick::isButtonPressed(0, 2)) {
 						pm.move = Move::HardDrop;
 						pm.player = playerFour;
-						return pm;
+						break;
 					}
 				}
 			}
-			return pm;
+			break;
 
 		default: // If no move was made
 			pm.move = Move::None; 
-			return pm;
+			break;
 		}
 
 	}
