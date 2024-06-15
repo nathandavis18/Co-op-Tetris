@@ -7,4 +7,5 @@ public:
 	void stopMusic();
 private:
 	sf::Music m_theme;
+	bool musicAvailable;
 };

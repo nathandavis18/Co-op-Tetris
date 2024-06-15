@@ -4,10 +4,9 @@
 #include "../Headers/Game.hpp"
 
 
-Game::Game() : m_window(sf::VideoMode(totalWidth, totalHeight), "TETRIS"), m_renderer(&m_window) {
+Game::Game() : m_window(sf::VideoMode(totalWidth, totalHeight), "TETRIS"), m_renderer(&m_window), m_inputController(InputController(&m_window)) {
 	for (u8 i = 0; i < numPlayers; ++i) {
 		m_states[i] = std::make_unique<State>(State());
-		m_states[i]->nextPiece = std::make_unique<Piece>(m_blocks.getBlock());
 		newPiece(i);
 
 		PlayerColor pc;
@@ -28,16 +27,15 @@ Game::Game() : m_window(sf::VideoMode(totalWidth, totalHeight), "TETRIS"), m_ren
 			pc.ghostFillColor = sf::Color(100, 0, 50, 100);
 		}
 		m_playerColors[i] = pc;
+		m_times[i] = sf::milliseconds(m_timeToNextDrop * 1000);
 	}
 	std::fill(m_board.begin(), m_board.end(), 0);
-	m_time = sf::milliseconds(m_timeToNextDrop * 1000);
 	m_musicController.startMusic();
 	getLevel();
 	loop();
 }
 void Game::newPiece(u8 playerIndex) {
-	m_states[playerIndex]->piece = std::move(m_states[playerIndex]->nextPiece); //Next piece becomes current piece
-	m_states[playerIndex]->nextPiece = std::make_unique<Piece>(m_blocks.getBlock()); //Next piece becomes a new piece
+	m_states[playerIndex]->piece = std::make_unique<Piece>(m_blocks.getBlock());
 
 	m_states[playerIndex]->xOffset = ((gameWidth * (playerIndex + 1)) / numPlayers) - 4;
 	m_states[playerIndex]->yOffset = 0;
@@ -59,27 +57,28 @@ bool Game::getPiece(u8 x, u8 y, std::unique_ptr<Piece>& p, u8 rotation) {
 }
 
 void Game::loop() {
-	while (m_window.isOpen() && !quit) {
+	while (!quit && m_window.isOpen()) {
 		input();
 		renderGame();
-		if (m_time.asMilliseconds() <= 0) {
-			for (u8 i = 0; i < numPlayers; ++i) {
-				++m_states[i]->yOffset;
-			}
-			setTimeNextDrop();
-		}
+		sf::Time timeDiff = m_clock.restart();
 		for (u8 playerIndex = 0; playerIndex < numPlayers; ++playerIndex) {
-			if (hasCollided(playerIndex)) {
-				--m_states[playerIndex]->yOffset;
-				updateBoard(playerIndex);
-				clearLines();
-				quit = hasLost();
-				getLevel();
-				newPiece(playerIndex);
+			if (m_times[playerIndex].asMilliseconds() <= 0) {
+				if (hasCollided(playerIndex)) {
+					updateBoard(playerIndex);
+					clearLines();
+					quit = hasLost();
+					getLevel();
+					newPiece(playerIndex);
+				}
+				else {
+					++m_states[playerIndex]->yOffset;
+				}
+				setTimeNextDrop(playerIndex);
+			}
+			else {
+				m_times[playerIndex] -= timeDiff;
 			}
 		}
-
-		m_time -= m_clock.restart();
 	}
 	while (quit && m_window.isOpen()) {
 		m_renderer.clearRenderer();
@@ -96,9 +95,9 @@ void Game::getLevel() {
 		m_level = 29; //Level 29 (30 if not 0 indexing) is the max m_level
 	}
 }
-void Game::setTimeNextDrop() {
+void Game::setTimeNextDrop(u8 playerIndex) {
 	m_timeToNextDrop = m_framesPerDrop[m_level] / framesPerSecond;
-	m_time = sf::milliseconds(m_timeToNextDrop * 1000);
+	m_times[playerIndex] = sf::milliseconds(m_timeToNextDrop * 1000);
 }
 void Game::updateBoard(u8 playerIndex) { //Board gets updated when the playing piece collides with the m_board
 	std::unique_ptr<State>& state = m_states[playerIndex];
@@ -151,8 +150,8 @@ bool Game::hasCollided(u8 playerIndex) {
 		for (int y = 0; y < state->piece->width; ++y) {
 			if (getPiece(x, y, state->piece, state->rotation)) {
 				u8 bX = state->xOffset + x;
-				u8 bY = state->yOffset + y;
-				if (bY >= 0 && (m_board[bY * gameWidth + bX] >= 1 || bY >= gameHeight)) {
+				u8 bY = state->yOffset + y + 1; //Checking the spot below the piece
+				if (bY >= 0 && (m_board[bY * gameWidth + bX] || bY >= gameHeight)) {
 					return true;
 				}
 			}
@@ -206,7 +205,7 @@ void Game::wallKick(u8 playerIndex) {
 	}
 }
 
-u8 Game::getBottom(u8 playerIndex, bool ghost) {
+u8 Game::getBottom(u8 playerIndex) {
 	u8 checkAmount;
 	u8 finalAmount = gameHeight;
 	std::unique_ptr<State>& state = m_states[playerIndex];
@@ -215,8 +214,8 @@ u8 Game::getBottom(u8 playerIndex, bool ghost) {
 			if (getPiece(x, y, state->piece, state->rotation)) {
 				checkAmount = 0;
 				s8 bX = state->xOffset + x;
-				s8 bY = state->yOffset + y + ghost; //If we are getting the ghost piece, it is 1 value higher
-				while (m_board[bY * gameWidth + bX] < 1 && bY < gameHeight) {
+				s8 bY = state->yOffset + y + 1;
+				while (!m_board[bY * gameWidth + bX] && bY < gameHeight) {
 					++checkAmount;
 					++bY;
 				}
@@ -234,7 +233,7 @@ void Game::renderGame() {
 
 	for (u8 playerIndex = 0; playerIndex < numPlayers; ++playerIndex) {
 		renderPiece(PieceToDraw::NormalPiece, playerIndex);
-		u8 ghostPieceDrop = getBottom(playerIndex, true);
+		u8 ghostPieceDrop = getBottom(playerIndex);
 		renderPiece(PieceToDraw::GhostPiece, playerIndex, ghostPieceDrop);
 	}
 
@@ -310,189 +309,45 @@ bool Game::isValidMove(Move move, u8 playerIndex) { //Can't move into the m_boar
 	}
 	return true;
 }
+void Game::dropPiece(u8 playerIndex) {
+	m_states[playerIndex]->yOffset += getBottom(playerIndex);
+	m_times[playerIndex] = sf::milliseconds(0);
+}
 void Game::input() {
-	while (m_window.pollEvent(event)) {
-		switch (event.type) {
-		case sf::Event::Closed:
-			m_window.close();
-			break;
-		case sf::Event::EventType::KeyPressed: 
+	PlayerMove pm = m_inputController.input();
+	switch (pm.move) {
+	case Move::Right:
+		if (isValidMove(Move::Right, pm.player))
+			++m_states[pm.player]->xOffset;
+		break;
 
-			/**
-			* Player One Controls
-			*/
-			if (event.key.code == sf::Keyboard::Right) {
-				if(isValidMove(Move::Right, playerOne))
-					++m_states[playerOne]->xOffset;
-				break;
-			}
-			if (event.key.code == sf::Keyboard::Left) {
-				if(isValidMove(Move::Left, playerOne))
-					--m_states[playerOne]->xOffset;
-				break;
-			}
-			if (event.key.code == sf::Keyboard::Down) {
-				if (isValidMove(Move::Down, playerOne))
-					++m_states[playerOne]->yOffset;
-				break;
-			}
-			if (event.key.code == sf::Keyboard::Up) {
-				if (canWallKick((m_states[playerOne]->rotation + 1) % 4, playerOne)) {
-					m_states[playerOne]->rotation = (m_states[playerOne]->rotation + 1) % 4;
-						wallKick(playerOne);
-				}
-				break;
-			}
-			if (event.key.code == sf::Keyboard::PageDown) {
-				m_states[playerOne]->yOffset += getBottom(playerOne);
-				break;
-			}
+	case Move::Left:
+		if (isValidMove(Move::Left, pm.player))
+			--m_states[pm.player]->xOffset;
+		break;
 
-			/**
-			* Player Two Controls
-			*/
-			if (numPlayers >= 2) {
-				if (event.key.code == sf::Keyboard::D) {
-					if (isValidMove(Move::Right, playerTwo))
-						++m_states[playerTwo]->xOffset;
-					break;
-				}
-				if (event.key.code == sf::Keyboard::A) {
-					if (isValidMove(Move::Left, playerTwo))
-						--m_states[playerTwo]->xOffset;
-					break;
-				}
-				if (event.key.code == sf::Keyboard::S) {
-					if (isValidMove(Move::Down, playerTwo))
-						++m_states[playerTwo]->yOffset;
-					break;
-				}
-				if (event.key.code == sf::Keyboard::W) {
-					if (canWallKick((m_states[playerTwo]->rotation + 1) % 4, playerTwo)) {
-						m_states[playerTwo]->rotation = (m_states[playerTwo]->rotation + 1) % 4;
-						wallKick(playerTwo);
-					}
-					break;
-				}
-				if (event.key.code == sf::Keyboard::R) {
-					m_states[playerTwo]->yOffset += getBottom(playerTwo);
-					break;
-				}
-			}
+	case Move::Down:
+		if (isValidMove(Move::Down, pm.player))
+			m_times[pm.player] = sf::milliseconds(0);
+		break;
 
-			/**
-			* Player Three Controls
-			*/
-			if (numPlayers >= 3) {
-				if (event.key.code == sf::Keyboard::L) {
-					if (isValidMove(Move::Right, playerThree))
-						++m_states[playerThree]->xOffset;
-					break;
-				}
-				if (event.key.code == sf::Keyboard::J) {
-					if (isValidMove(Move::Left, playerThree))
-						--m_states[playerThree]->xOffset;
-					break;
-				}
-				if (event.key.code == sf::Keyboard::K) {
-					if (isValidMove(Move::Down, playerThree))
-						++m_states[playerThree]->yOffset;
-					break;
-				}
-				if (event.key.code == sf::Keyboard::I) {
-					if (canWallKick((m_states[playerThree]->rotation + 1) % 4, playerThree)) {
-						m_states[playerThree]->rotation = (m_states[playerThree]->rotation + 1) % 4;
-						wallKick(playerThree);
-					}
-					break;
-				}
-				if (event.key.code == sf::Keyboard::P) {
-					m_states[playerThree]->yOffset += getBottom(playerThree);
-					break;
-				}
-			}
-
-			/**
-			* Player Four Controls
-			*/
-			if (numPlayers == 4) {
-				if (event.key.code == sf::Keyboard::Numpad6) {
-					if (isValidMove(Move::Right, playerFour))
-						++m_states[playerFour]->xOffset;
-					break;
-				}
-				if (event.key.code == sf::Keyboard::Numpad4) {
-					if (isValidMove(Move::Left, playerFour))
-						--m_states[playerFour]->xOffset;
-					break;
-				}
-				if (event.key.code == sf::Keyboard::Numpad5) {
-					if (isValidMove(Move::Down, playerFour))
-						++m_states[playerFour]->yOffset;
-					break;
-				}
-				if (event.key.code == sf::Keyboard::Numpad8) {
-					if (canWallKick((m_states[playerFour]->rotation + 1) % 4, playerFour)) {
-						m_states[playerFour]->rotation = (m_states[playerFour]->rotation + 1) % 4;
-						wallKick(playerFour);
-					}
-					break;
-				}
-				if (event.key.code == sf::Keyboard::Add) {
-					m_states[playerFour]->yOffset += getBottom(playerFour);
-					break;
-				}
-			}
-			if (quit) {
-				if (event.key.code == sf::Keyboard::F5) {
-					restart();
-				}
-			}
-			break;
-
-		/*
-		* Having a controller for the 4th person might be easier.
-		*/
-		case sf::Event::EventType::JoystickMoved:
-			if (numPlayers == 4) {
-				if (sf::Joystick::isConnected(0)) {
-					if (sf::Joystick::getAxisPosition(0, sf::Joystick::PovX) == 100) {
-						if (isValidMove(Move::Right, playerFour))
-							++m_states[playerFour]->xOffset;
-						break;
-					}
-					if (sf::Joystick::getAxisPosition(0, sf::Joystick::PovX) == -100) {
-						if (isValidMove(Move::Left, playerFour))
-							--m_states[playerFour]->xOffset;
-						break;
-					}
-					if (sf::Joystick::getAxisPosition(0, sf::Joystick::PovY) == -100) {
-						if (isValidMove(Move::Down, playerFour))
-							++m_states[playerFour]->yOffset;
-						break;
-					}
-				}
-			}
-			break;
-
-		case sf::Event::EventType::JoystickButtonPressed:
-			if (numPlayers == 4) {
-				if (sf::Joystick::isConnected(0)) {
-					if (sf::Joystick::isButtonPressed(0, 3)) {
-						if (canWallKick((m_states[playerFour]->rotation + 1) % 4, playerFour)) {
-							m_states[playerFour]->rotation = (m_states[playerFour]->rotation + 1) % 4;
-							wallKick(playerFour);
-						}
-						break;
-					}
-					if (sf::Joystick::isButtonPressed(0, 2)) {
-						m_states[playerFour]->yOffset += getBottom(playerFour);
-						break;
-					}
-				}
-			}
+	case Move::Rotate:
+		if (canWallKick((m_states[pm.player]->rotation + 1) % 4, pm.player)) {
+			m_states[pm.player]->rotation = (m_states[pm.player]->rotation + 1) % 4;
+			wallKick(pm.player);
 		}
+		break;
 
+	case Move::HardDrop:
+		dropPiece(pm.player);
+		break;
+
+	case Move::PlayAgain:
+		restart();
+		break;
+
+	default:
+		break;
 	}
 }
 
@@ -504,15 +359,13 @@ void Game::restart() {
 	m_yClearLevel = 0;
 	m_timeToNextDrop = m_framesPerDrop[m_level] / framesPerSecond;
 	for (u8 i = 0; i < numPlayers; ++i) {
-		m_states[i]->piece.get_deleter();
-		m_states[i]->nextPiece.get_deleter();
+		m_states[i]->piece.reset();
 	}
 	for (u8 i = 0; i < numPlayers; ++i) {
-		m_states[i]->nextPiece = std::make_unique<Piece>(m_blocks.getBlock());
 		newPiece(i);
+		m_times[i] = sf::milliseconds(m_timeToNextDrop * 1000);
 	}
 	std::fill(m_board.begin(), m_board.end(), 0);
-	m_time = sf::milliseconds(m_timeToNextDrop * 1000);
 	m_musicController.startMusic();
 	getLevel();
 	loop();

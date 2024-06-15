@@ -13,7 +13,11 @@ The game board size scales with the number of players, so 1 player is normal tet
     Right Arrow -> Right
     Up Arrow -> Rotate
     Down Arrow -> Soft Drop
-    Space -> Hard Drop
+    Page Down -> Hard Drop
+
+    or
+
+    Space -> Hard Drop (when set to 1 player only)
 
 #### Player Two
     A -> Left
@@ -36,7 +40,7 @@ The game board size scales with the number of players, so 1 player is normal tet
     Numpad5 -> Soft Drop
     Numpad+ -> Hard Drop
 
-    or if using controller
+    or alternatively if you have a controller
 
     DPad Left -> Left
     DPad Right -> Right

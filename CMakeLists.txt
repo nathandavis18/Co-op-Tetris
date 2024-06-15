@@ -14,7 +14,9 @@ set(SOURCES src/main.cpp
 			src/Game.cpp
 			src/Blocks.cpp
 			src/Renderer.cpp
-            src/MusicController.cpp)
+            src/MusicController.cpp 
+            src/InputController.cpp
+)
 
 set(HEADERS Headers/Blocks.hpp
 			Headers/PieceState.hpp
@@ -22,6 +24,7 @@ set(HEADERS Headers/Blocks.hpp
 			Headers/Globals.hpp
 			Headers/Renderer.hpp
             Headers/MusicController.hpp
+            Headers/InputController.hpp
 )
 
 add_executable (Tetris ${SOURCES} ${HEADERS})

@@ -6,6 +6,7 @@
 #include "Blocks.hpp"
 #include "Renderer.hpp"
 #include "MusicController.hpp"
+#include "InputController.hpp"
 
 using State = PieceState::State;
 using Piece = PieceState::Piece;
@@ -19,7 +20,7 @@ public:
 	
 	void loop();
 	void getLevel();
-	void setTimeNextDrop();
+	void setTimeNextDrop(u8 playerIndex);
 	void updateBoard(u8 playerIndex);
 	bool isFullRow(int y);
 	void clearLines();
@@ -32,8 +33,9 @@ public:
 
 	bool isValidMove(Move move, u8 playerIndex);
 	void input();
+	void dropPiece(u8 playerIndex);
 
-	u8 getBottom(u8 playerIndex, bool = false);
+	u8 getBottom(u8 playerIndex);
 	void renderGame();
 	void renderBoard();
 	void renderBorder();
@@ -65,19 +67,17 @@ private:
 	sf::RenderWindow m_window;
 	Renderer m_renderer;
 	MusicController m_musicController;
+	InputController m_inputController;
+	
 
 	std::array<std::unique_ptr<State>, numPlayers> m_states;
 	Blocks m_blocks;
 
-	sf::Time m_time = sf::milliseconds(1000);
+	std::array<sf::Time, numPlayers> m_times;
 	sf::Clock m_clock;
 
     const sf::Color ghostOutlineColor = sf::Color(50, 50, 50, 50);
 	static constexpr u8 linesToNextLevel = 10;
 	static constexpr double framesPerSecond = 60.0;
-	static constexpr u8 playerOne = 0;
-	static constexpr u8 playerTwo = 1;
-	static constexpr u8 playerThree = 2;
-	static constexpr u8 playerFour = 3;
 };
 

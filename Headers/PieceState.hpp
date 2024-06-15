@@ -13,7 +13,6 @@ namespace PieceState
 
 	struct State {
 		std::unique_ptr<Piece> piece;
-		std::unique_ptr<Piece> nextPiece;
 
 		s8 rotation = 0;
 		s8 xOffset = 0;

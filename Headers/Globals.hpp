@@ -1,15 +1,20 @@
 #pragma once
 #include <cstdint>
 
-enum class Move{Left, Right, Down};
-enum class PieceToDraw{NormalPiece, GhostPiece, NextPiece};
-
 using u8 = std::uint8_t;
 using u16 = std::uint16_t;
 using u32 = std::uint32_t;
 using s8 = std::int8_t;
 using s16 = std::int16_t;
 using s32 = std::int32_t;
+
+enum class Move{Left, Right, Down, Rotate, HardDrop, PlayAgain, Default};
+enum class PieceToDraw{NormalPiece, GhostPiece, NextPiece};
+
+struct PlayerMove {
+	Move move;
+	u8 player;
+};
 
 static bool quit = false;
 
@@ -23,3 +28,8 @@ static constexpr int totalWidth = (sideBuffer * 2 + gameWidth) * pieceSize;
 static constexpr int totalHeight = (pieceSize * gameHeight) + (pieceSize * 2);
 static constexpr int boardXOffset = (totalWidth / pieceSize - gameWidth) / 2; //Offset is left and right sides so we / 2
 static constexpr int boardYOffset = (totalHeight / pieceSize - gameHeight) / 2;
+
+static constexpr u8 playerOne = 0;
+static constexpr u8 playerTwo = 1;
+static constexpr u8 playerThree = 2;
+static constexpr u8 playerFour = 3;
