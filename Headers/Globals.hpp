@@ -20,17 +20,16 @@ struct PlayerMove {
 	u8 player;
 };
 
-static bool quit = false;
+static constexpr u8 numPlayers = 1;
+static constexpr double boardScalingFactor = 3.4; //Board doubles in size for 4 people
 
-static constexpr u8 numPlayers = 4;
-
-static constexpr int gameWidth = 10 + ((numPlayers - 1) * 3.4);
+static constexpr int gameWidth = 10 + ((numPlayers - 1) * boardScalingFactor);
 static constexpr int gameHeight = 20;
 static constexpr int boardHeight = 22;
 static constexpr int pieceSize = 30;
 static constexpr int sideBuffer = 8; //Gives 8 tiles worth of space on left and right sides
 static constexpr int totalWidth = (sideBuffer * 2 + gameWidth) * pieceSize;
-static constexpr int totalHeight = (pieceSize * gameHeight) + (pieceSize * 2);
+static constexpr int totalHeight = pieceSize * boardHeight;
 static constexpr int boardXOffset = (totalWidth / pieceSize - gameWidth) / 2; //Offset is left and right sides so we / 2
 static constexpr int boardYOffset = (totalHeight / pieceSize - gameHeight) / 2;
 

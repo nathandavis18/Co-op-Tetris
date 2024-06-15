@@ -21,7 +21,7 @@ PlayerMove InputController::input(bool quit) {
 		switch (m_event.type) {
 		case sf::Event::Closed:
 			m_window->close();
-			break;
+			return pm;
 
 		case sf::Event::EventType::KeyPressed:
 			/**
@@ -50,7 +50,7 @@ PlayerMove InputController::input(bool quit) {
 			if (m_event.key.code == sf::Keyboard::Space && numPlayers == 1) {
 				pm.move = Move::HardDrop;
 				pm.player = playerOne;
-				return pm;
+				break;
 			}
 			if (m_event.key.code == sf::Keyboard::PageDown && numPlayers > 1) {
 				pm.move = Move::HardDrop;
@@ -202,7 +202,6 @@ PlayerMove InputController::input(bool quit) {
 			break;
 
 		default: // If no move was made
-			pm.move = Move::None; 
 			break;
 		}
 
