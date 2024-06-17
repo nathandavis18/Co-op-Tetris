@@ -1,6 +1,6 @@
-#include "../Headers/Game.hpp"
+#include "../MainMenu/Headers/MainMenu.hpp"
 
 int main() {
-	Game game(1);
+	MainMenu mainMenu;
 	return 0;
 }

@@ -19,12 +19,14 @@ using Piece = PieceState::Piece;
 /// </summary>
 class Game{
 public:
-	Game(u8 numPlayers);
+	Game(u8 numPlayers, u8 gameWidth, u8 gameHeight, u16 boardXOffset, u16 boardYOffset, u16 windowWidth, u16 windowHeight, 
+			sf::RenderWindow*, Renderer*, Board*, InputController*, MusicController*, PieceState*);
+private: //Private functions - Only the game class should be calling these
 	void loop();
 
 	void newPiece(u8 playerIndex);
 	bool getPieceData(u8 x, u8 y, std::unique_ptr<Piece>&, u8 rotation);
-	
+
 	void updateLevel();
 	void setTimeNextDrop(u8 playerIndex);
 	void updateBoard(u8 playerIndex);
@@ -33,7 +35,7 @@ public:
 
 	bool hasCollided(u8 playerIndex);
 	bool hasLost();
-	
+
 	bool canWallKick(u8 rotation, u8 playerIndex);
 	void wallKick(u8 playerIndex);
 
@@ -46,15 +48,11 @@ public:
 	void renderPiece(PieceToDraw piece, u8 playerIndex, u8 ghostPieceOffset = 0);
 	void renderBorder();
 	void renderText();
-
-private: //Private function/struct
 	void restart();
 
 private: //Private variables
 	bool m_quit = false;
 	const u8 m_numPlayers;
-
-	Board m_board;
 
 	static constexpr u8 linesToNextLevel = 10;
 	u8 m_level = 0;
@@ -70,25 +68,22 @@ private: //Private variables
 	};
 	double m_timeToNextDrop = m_framesPerDrop[m_level] / framesPerSecond;
 
-	sf::RenderWindow m_window;
-	Renderer m_renderer;
-	MusicController m_musicController;
-	InputController m_inputController;
+	sf::RenderWindow* m_window;
+	Renderer* m_renderer;
+	MusicController* m_musicController;
+	InputController* m_inputController;
+	Board* m_board;
+	PieceState* m_pieceState;
 	
-	std::vector<std::unique_ptr<State>> m_pieceStates;
+	std::vector<std::unique_ptr<State>> m_playerStates;
 	Blocks m_blockGenerator;
 
 	std::vector<sf::Time> m_playerTimes;
 	sf::Clock m_clock;
 
 	std::vector<PlayerColor> m_playerColors;
-    const sf::Color ghostOutlineColor = sf::Color(50, 50, 50, 50);
 
-	static constexpr double m_boardScalingFactor = 3.4; //Board doubles in size for 4 people
-	static constexpr u8 m_baseWidth = 10;
-	static constexpr u8 m_gameHeight = 20;
-
-	const u16 m_gameWidth, m_totalWidth, m_totalHeight;
+	const u16 m_gameWidth, m_gameHeight, m_totalWidth, m_totalHeight;
 	const u16 m_boardXOffset, m_boardYOffset;
 };
 

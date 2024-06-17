@@ -1,7 +1,7 @@
 #include "../Headers/Board.hpp"
 
 Board::Board(u8 width, u8 height) : m_boardWidth(width), m_boardHeight(height) {
-	m_board.resize(m_boardHeight * m_boardWidth);
+	m_board.resize(width * height);
 	resetBoard();
 }
 
@@ -22,7 +22,7 @@ void Board::renderBoard(Renderer* renderer, std::vector<PlayerColor>& playerColo
 		for (int y = 0; y < m_boardHeight; ++y) {
 			if (getBoardPosition(x, y)) {
 				PlayerColor playerColor = playerColors[getBoardPosition(x, y) - 1];
-				renderer->draw(x + boardXOffset, y + boardYOffset, playerColor.fillColor, sf::Color::White);
+				renderer->drawPiece(x + boardXOffset, y + boardYOffset, playerColor.fillColor, sf::Color::White);
 			}
 		}
 	}

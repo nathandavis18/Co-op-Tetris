@@ -4,11 +4,6 @@
 #include "Globals.hpp"
 #include "Renderer.hpp"
 
-struct PlayerColor {
-	sf::Color fillColor;
-	sf::Color ghostFillColor;
-};
-
 class Board {
 public:
 	Board(u8 width, u8 height);
