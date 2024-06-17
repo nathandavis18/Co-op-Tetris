@@ -1,4 +1,5 @@
 #pragma once
+#include <vector>
 #include <array>
 
 #include "Globals.hpp"
@@ -7,6 +8,7 @@
 #include "Renderer.hpp"
 #include "MusicController.hpp"
 #include "InputController.hpp"
+#include "Board.hpp"
 
 using State = PieceState::State;
 using Piece = PieceState::Piece;
@@ -17,7 +19,7 @@ using Piece = PieceState::Piece;
 /// </summary>
 class Game{
 public:
-	Game();
+	Game(u8 numPlayers);
 	void loop();
 
 	void newPiece(u8 playerIndex);
@@ -42,21 +44,17 @@ public:
 
 	void renderGame();
 	void renderPiece(PieceToDraw piece, u8 playerIndex, u8 ghostPieceOffset = 0);
-	void renderBoard();
 	void renderBorder();
 	void renderText();
 
 private: //Private function/struct
 	void restart();
 
-	struct PlayerColor {
-		sf::Color fillColor;
-		sf::Color ghostFillColor;
-	};
-
 private: //Private variables
 	bool m_quit = false;
-	std::array<u16, gameWidth * boardHeight> m_board;
+	const u8 m_numPlayers;
+
+	Board m_board;
 
 	static constexpr u8 linesToNextLevel = 10;
 	u8 m_level = 0;
@@ -77,14 +75,20 @@ private: //Private variables
 	MusicController m_musicController;
 	InputController m_inputController;
 	
-
-	std::array<std::unique_ptr<State>, numPlayers> m_pieceStates;
+	std::vector<std::unique_ptr<State>> m_pieceStates;
 	Blocks m_blockGenerator;
 
-	std::array<sf::Time, numPlayers> m_playerTimes;
+	std::vector<sf::Time> m_playerTimes;
 	sf::Clock m_clock;
 
-	std::array<PlayerColor, numPlayers> m_playerColors;
+	std::vector<PlayerColor> m_playerColors;
     const sf::Color ghostOutlineColor = sf::Color(50, 50, 50, 50);
+
+	static constexpr double m_boardScalingFactor = 3.4; //Board doubles in size for 4 people
+	static constexpr u8 m_baseWidth = 10;
+	static constexpr u8 m_gameHeight = 20;
+
+	const u16 m_gameWidth, m_totalWidth, m_totalHeight;
+	const u16 m_boardXOffset, m_boardYOffset;
 };
 
