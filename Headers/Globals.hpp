@@ -5,14 +5,12 @@ using u8 = std::uint8_t;
 using u16 = std::uint16_t;
 using u32 = std::uint32_t;
 using s8 = std::int8_t;
-using s16 = std::int16_t;
-using s32 = std::int32_t;
 
 /**
 * This header defines global variables used by multiple/all other classes.
 * Also defines the typedefs above.
 */
-enum class Move{Left, Right, Down, Rotate, HardDrop, PlayAgain, None};
+enum Move { Right = 0, Left = 1, Down = 2, Rotate = 3, HardDrop = 4, PlayAgain = 5, None };
 enum class PieceToDraw{NormalPiece, GhostPiece};
 
 struct PlayerMove {
