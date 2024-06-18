@@ -22,14 +22,17 @@ public:
 	/// </summary>
 	static struct State {
 		std::unique_ptr<Piece> piece;
+		std::unique_ptr<Piece> nextPiece;
+		std::unique_ptr<Piece> heldPiece;
 
-		s8 rotation = 0;
+		u8 rotation = 0;
 		s8 xOffset = 0;
-		s8 yOffset = 0;
+		u8 yOffset = 0;
+		bool canHoldPiece = true;
 	};
 
 public:
-	void renderPiece(Renderer* const, const std::unique_ptr<State>&, PlayerColor* const, const PieceToDraw, const u16 boardXOffset, const u16 boardYOffset, const u8 ghostPieceOffset = 0);
+	void renderPiece(Renderer* const, const std::unique_ptr<Piece>&, const u8 rotation, const s8 xOffset, const u8 yOffset, PlayerColor* const, const PieceToDraw, const u8 ghostPieceOffset = 0);
 	bool getPieceData(const u8 x, const u8 y, const std::unique_ptr<Piece>&, const u8 rotation);
 
 private:

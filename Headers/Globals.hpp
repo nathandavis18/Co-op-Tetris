@@ -12,8 +12,8 @@ using s8 = std::int8_t;
 * This header defines global variables used by multiple/all other classes.
 * Also defines the typedefs above.
 */
-enum Move { Right = 0, Left = 1, Down = 2, Rotate = 3, HardDrop = 4, PlayAgain = 5, None };
-enum class PieceToDraw { NormalPiece, GhostPiece};
+enum Move { Right = 0, Left = 1, Down = 2, Rotate = 3, HardDrop = 4, HoldPiece = 5, PlayAgain = 6, None };
+enum class PieceToDraw { NormalPiece, GhostPiece, HeldPiece, NextPiece};
 
 
 struct PlayerMove {
@@ -32,3 +32,4 @@ struct PlayerColor {
 };
 
 static constexpr u8 sideBuffer = 8;
+static constexpr s8 verticalBuffer = 6;

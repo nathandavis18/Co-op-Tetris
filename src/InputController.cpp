@@ -133,6 +133,9 @@ PlayerMove InputController::input(const bool quit) {
 					case Move::HardDrop:
 						pm.move = Move::HardDrop;
 						break;
+					case Move::HoldPiece:
+						pm.move = Move::HoldPiece;
+						break;
 					}
 					pm.player = x.playerIndex;
 					break;
@@ -158,6 +161,9 @@ PlayerMove InputController::input(const bool quit) {
 						break;
 					case Move::HardDrop:
 						pm.move = Move::HardDrop;
+						break;
+					case Move::HoldPiece:
+						pm.move = Move::HoldPiece;
 						break;
 					}
 					pm.player = x.playerIndex;

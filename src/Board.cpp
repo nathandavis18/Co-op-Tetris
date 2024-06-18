@@ -17,12 +17,12 @@ u8 Board::getBoardPosition(const s8 x, const u8 y) {
 	return m_board[y * m_boardWidth + x];
 }
 
-void Board::renderBoard(Renderer* const renderer, const std::vector<PlayerColor>& playerColors, const u16 boardXOffset, const u16 boardYOffset) {
+void Board::renderBoard(Renderer* const renderer, const std::vector<PlayerColor>& playerColors) {
 	for (int x = 0; x < m_boardWidth; ++x) {
 		for (int y = 0; y < m_boardHeight; ++y) {
 			if (getBoardPosition(x, y)) {
 				PlayerColor playerColor = playerColors[getBoardPosition(x, y) - 1];
-				renderer->drawPiece(x + boardXOffset, y + boardYOffset, playerColor.fillColor, sf::Color::White);
+				renderer->drawPiece(x, y, playerColor.fillColor, sf::Color::White);
 			}
 		}
 	}

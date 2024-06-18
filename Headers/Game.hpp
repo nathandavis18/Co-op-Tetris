@@ -41,6 +41,7 @@ private: //Private functions - Only the game class should be calling these
 	bool isValidMove(const Move move, const u8 playerIndex);
 	void input();
 	void dropPiece(const u8 playerIndex);
+	void holdPiece(const u8 playerIndex);
 	u8 getBottom(const u8 playerIndex);
 
 	void renderGame();
@@ -57,13 +58,13 @@ private: //Private variables
 	u8 m_clearedLines = 0;
 	u8 m_yClearLevel = 0;
 
-	static constexpr double framesPerSecond = 60.0;
+	static constexpr double m_framesPerSecond = 60.0;
 	const std::array<u8, 30> m_framesPerDrop = { //From the tetris wiki
 		48, 43, 38, 33, 28, 23, 18, 13, 8, 6,
 		5, 5, 5, 4, 4, 4, 3, 3, 3, 2, 2, 2, 2,
 		2, 2, 2, 2, 2, 2, 1
 	};
-	double m_timeToNextDrop = m_framesPerDrop[m_level] / framesPerSecond;
+	double m_timeToNextDrop;
 
 	sf::RenderWindow* const m_window;
 	Renderer* const m_renderer;

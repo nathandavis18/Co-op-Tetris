@@ -11,12 +11,13 @@
 Game::Game(const u8 numPlayers, const u8 gameWidth, const u8 gameHeight, const u16 boardXOffset, const u16 boardYOffset, const u16 windowWidth, const u16 windowHeight, 
 	sf::RenderWindow* const window, Renderer* const renderer, Board* const board, InputController* const inputController, 
 	MusicController* const musicController, PieceState* const pieceState, Blocks* const blocks) : 
-	m_numPlayers(numPlayers), m_gameWidth(gameWidth), m_gameHeight(gameHeight), m_boardXOffset(boardXOffset), m_boardYOffset(boardYOffset),
-	m_totalWidth(windowWidth), m_totalHeight(windowHeight), 
+	m_numPlayers(numPlayers), m_timeToNextDrop(m_framesPerDrop[m_level] / m_framesPerSecond),
+	m_gameWidth(gameWidth), m_gameHeight(gameHeight), m_boardXOffset(boardXOffset), m_boardYOffset(boardYOffset), m_totalWidth(windowWidth), m_totalHeight(windowHeight), 
 	m_board(board), m_window(window), m_renderer(renderer), m_inputController(inputController), m_musicController(musicController), m_pieceState(pieceState), m_blockGenerator(blocks)
 {
 	for (u8 i = 0; i < numPlayers; ++i) {
 		m_playerStates.push_back(std::make_unique<State>(State()));
+		m_playerStates[i]->nextPiece = std::make_unique<Piece>(m_blockGenerator->getBlock());
 		newPiece(i);
 
 		PlayerColor pc;
@@ -74,7 +75,7 @@ void Game::loop() {
 	while (m_quit && m_window->isOpen()) {
 		m_renderer->clearRenderer();
 		input();
-		m_board->renderBoard(m_renderer, m_playerColors, m_boardXOffset, m_boardYOffset);
+		m_board->renderBoard(m_renderer, m_playerColors);
 		m_renderer->drawBorder(m_gameWidth, m_gameHeight);
 		renderText();
 		m_renderer->showRenderer();
@@ -86,7 +87,8 @@ void Game::loop() {
 /// </summary>
 /// <param name="playerIndex">The current player that needs a new piece</param>
 void Game::newPiece(const u8 playerIndex) {
-	m_playerStates[playerIndex]->piece = std::make_unique<Piece>(m_blockGenerator->getBlock());
+	m_playerStates[playerIndex]->piece = std::move(m_playerStates[playerIndex]->nextPiece);
+	m_playerStates[playerIndex]->nextPiece = std::make_unique<Piece>(m_blockGenerator->getBlock());
 
 	m_playerStates[playerIndex]->xOffset = ((m_gameWidth * (playerIndex + 1)) / m_numPlayers) - 4;
 	m_playerStates[playerIndex]->yOffset = 0;
@@ -108,7 +110,7 @@ void Game::updateLevel() {
 /// </summary>
 /// <param name="playerIndex">The current player</param>
 void Game::setTimeNextDrop(const u8 playerIndex) {
-	m_timeToNextDrop = m_framesPerDrop[m_level] / framesPerSecond;
+	m_timeToNextDrop = m_framesPerDrop[m_level] / m_framesPerSecond;
 	m_playerTimes[playerIndex] = sf::milliseconds(m_timeToNextDrop * 1000);
 }
 
@@ -313,6 +315,10 @@ void Game::input() {
 		dropPiece(pm.player);
 		break;
 
+	case Move::HoldPiece:
+		holdPiece(pm.player);
+		break;
+
 	case Move::PlayAgain:
 		restart();
 		break;
@@ -360,6 +366,22 @@ void Game::dropPiece(const u8 playerIndex) {
 	m_playerTimes[playerIndex] = sf::milliseconds(0);
 }
 
+void Game::holdPiece(const u8 playerIndex) {
+	if (m_playerStates[playerIndex]->canHoldPiece) {
+		if (m_playerStates[playerIndex]->heldPiece == nullptr) {
+			m_playerStates[playerIndex]->heldPiece = std::move(m_playerStates[playerIndex]->piece);
+			newPiece(playerIndex);
+		}
+		else {
+			std::iter_swap(m_playerStates[playerIndex]->piece.get(), m_playerStates[playerIndex]->heldPiece.get());
+			m_playerStates[playerIndex]->canHoldPiece = false;
+		}
+		m_playerStates[playerIndex]->rotation = 0;
+		m_playerStates[playerIndex]->xOffset = 0;
+		m_playerStates[playerIndex]->yOffset = 0;
+	}
+}
+
 /// <summary>
 /// The main function to call all child functions responsible for sending data to the renderer. 
 /// </summary>
@@ -367,11 +389,18 @@ void Game::renderGame() {
 	m_renderer->clearRenderer();
 
 	for (u8 playerIndex = 0; playerIndex < m_numPlayers; ++playerIndex) {
-		m_pieceState->renderPiece(m_renderer, m_playerStates[playerIndex], &m_playerColors[playerIndex], PieceToDraw::NormalPiece, m_boardXOffset, m_boardYOffset);
+		std::unique_ptr<State>& state = m_playerStates[playerIndex];
+		m_pieceState->renderPiece(m_renderer, state->piece, state->rotation, state->xOffset, state->yOffset, &m_playerColors[playerIndex], PieceToDraw::NormalPiece);
 		u8 ghostPieceOffset = getBottom(playerIndex);
-		m_pieceState->renderPiece(m_renderer, m_playerStates[playerIndex], &m_playerColors[playerIndex], PieceToDraw::GhostPiece, m_boardXOffset, m_boardYOffset, ghostPieceOffset);
+		m_pieceState->renderPiece(m_renderer, state->piece, state->rotation, state->xOffset, state->yOffset, &m_playerColors[playerIndex], PieceToDraw::GhostPiece, ghostPieceOffset);
+
+		if (state->heldPiece != nullptr) {
+			m_pieceState->renderPiece(m_renderer, state->heldPiece, 0, ((m_gameWidth * (playerIndex + 1)) / m_numPlayers) - 4, -verticalBuffer, &m_playerColors[playerIndex], PieceToDraw::HeldPiece);
+		}
+		m_pieceState->renderPiece(m_renderer, state->nextPiece, 0, ((m_gameWidth * (playerIndex + 1)) / m_numPlayers) - 4, m_gameHeight + 2, &m_playerColors[playerIndex], PieceToDraw::NextPiece);
+
 	}
-	m_board->renderBoard(m_renderer, m_playerColors, m_boardXOffset, m_boardYOffset);
+	m_board->renderBoard(m_renderer, m_playerColors);
 	m_renderer->drawBorder(m_gameWidth, m_gameHeight);
 	renderText();
 
@@ -384,8 +413,10 @@ void Game::renderGame() {
 void Game::renderText() {
 	std::string lvlStr = "Level: " + std::to_string(m_level + 1); //Levels are 1-30 but arrays are 0-indexed, so add 1 purely for display
 	std::string linesStr = "Lines: " + std::to_string(m_lines);
-	m_renderer->drawText(m_totalWidth - 200, m_totalHeight / 2, lvlStr);
-	m_renderer->drawText(m_totalWidth - 200, m_totalHeight / 2 + 50, linesStr);
+	m_renderer->drawText(m_totalWidth - 150, m_totalHeight / 2 - 25, lvlStr);
+	m_renderer->drawText(m_totalWidth - 150, m_totalHeight / 2 + 25, linesStr);
+	m_renderer->drawText(100, 50, "Held: ");
+	m_renderer->drawText(100, m_totalHeight - 100, "Next: ");
 }
 
 /// <summary>
@@ -397,7 +428,7 @@ void Game::restart() {
 	m_clearedLines = 0;
 	m_level = 0;
 	m_yClearLevel = 0;
-	m_timeToNextDrop = m_framesPerDrop[m_level] / framesPerSecond;
+	m_timeToNextDrop = m_framesPerDrop[m_level] / m_framesPerSecond;
 	for (u8 i = 0; i < m_numPlayers; ++i) {
 		m_playerStates[i]->piece.reset();
 		newPiece(i);

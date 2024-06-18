@@ -35,10 +35,7 @@ void MainMenu::setPlayerControl(const u8 player, const u8 controllerType, const 
 void MainMenu::calculateGameSizes() {
 	gameWidth = m_baseWidth + ((m_numPlayers - 1) * m_scalingFactor);
 	gameWindowWidth = (sideBuffer * 2 + gameWidth) * pieceSize;
-	gameWindowHeight = (gameHeight + 2) * pieceSize;
-
-	boardXOffset = (gameWindowWidth / pieceSize - gameWidth) / 2;
-	boardYOffset = (gameWindowHeight / pieceSize - gameHeight) / 2;
+	gameWindowHeight = (verticalBuffer * 2 + gameHeight + 2) * pieceSize;
 }
 
 void MainMenu::startGame() {
@@ -51,5 +48,5 @@ void MainMenu::startGame() {
 	MusicController mainMusicController;
 	PieceState mainPieceState;
 	Blocks mainBlockGenerator;
-	Game game(m_numPlayers, gameWidth, gameHeight, boardXOffset, boardYOffset, gameWindowWidth, gameWindowHeight, &gameWindow, &mainRenderer, &mainBoard, &mainInputController, &mainMusicController, &mainPieceState, &mainBlockGenerator);
+	Game game(m_numPlayers, gameWidth, gameHeight, sideBuffer, verticalBuffer, gameWindowWidth, gameWindowHeight, &gameWindow, &mainRenderer, &mainBoard, &mainInputController, &mainMusicController, &mainPieceState, &mainBlockGenerator);
 }

@@ -24,13 +24,13 @@ void Renderer::showRenderer() {
 }
 
 void Renderer::drawBorder(const u8 width, const u8 height) {
-	for (u8 x = sideBuffer - 1; x <= width + sideBuffer; ++x) {
-		drawPiece(x, 0, sf::Color::White, sf::Color::Blue);
-		drawPiece(x, height + 1, sf::Color::White, sf::Color::Blue);
+	for (s8 x = -1; x <= width; ++x) {
+		drawPiece(x, -1, sf::Color::White, sf::Color::Blue);
+		drawPiece(x, height, sf::Color::White, sf::Color::Blue);
 	}
-	for (u8 y = 0; y <= height; ++y) {
-		drawPiece(7, y, sf::Color::White, sf::Color::Blue);
-		drawPiece(width + 8, y, sf::Color::White, sf::Color::Blue);
+	for (s8 y = -1; y < height; ++y) {
+		drawPiece(-1, y, sf::Color::White, sf::Color::Blue);
+		drawPiece(width, y, sf::Color::White, sf::Color::Blue);
 	}
 }
 
@@ -41,7 +41,7 @@ void Renderer::drawBorder(const u8 width, const u8 height) {
 /// <param name="y">The y position of the piece</param>
 /// <param name="fill">The fill color of the piece</param>
 /// <param name="outline">The outline color of the piece</param>
-void Renderer::drawPiece(const u16 x, const u16 y, const sf::Color fill, const sf::Color outline) {
+void Renderer::drawPiece(const s8 x, const s8 y, const sf::Color fill, const sf::Color outline) {
 	sf::RectangleShape rect;
 
 	rect.setFillColor(fill);
@@ -49,7 +49,7 @@ void Renderer::drawPiece(const u16 x, const u16 y, const sf::Color fill, const s
 	rect.setOutlineThickness(1);
 	
 	rect.setSize(sf::Vector2f(m_pieceSize, m_pieceSize));
-	rect.setPosition(x * m_pieceSize, y * m_pieceSize);
+	rect.setPosition((x * m_pieceSize) + (sideBuffer * m_pieceSize), y * m_pieceSize + (verticalBuffer * m_pieceSize) + m_pieceSize);
 	
 	m_window->draw(rect);
 }

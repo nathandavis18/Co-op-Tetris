@@ -1,17 +1,23 @@
 #include "../Headers/PieceState.hpp"
 
-void PieceState::renderPiece(Renderer* const renderer, const std::unique_ptr<State>& state, PlayerColor* const playerColor, 
-	const PieceToDraw pieceToDraw, const u16 boardXOffset, const u16 boardYOffset, const u8 ghostPieceOffset) 
+void PieceState::renderPiece(Renderer* const renderer, const std::unique_ptr<Piece>& piece, const u8 rotation, const s8 xOffset, const u8 yOffset, 
+	PlayerColor* const playerColor, const PieceToDraw pieceToDraw, const u8 ghostPieceOffset) 
 {
-	for (int y = 0; y < state->piece->width; ++y) {
-		for (int x = 0; x < state->piece->width; ++x) {
-			if (getPieceData(x, y, state->piece, state->rotation)) {
+	for (int y = 0; y < piece->width; ++y) {
+		for (int x = 0; x < piece->width; ++x) {
+			if (getPieceData(x, y, piece, rotation)) {
 				switch (pieceToDraw) {
 				case PieceToDraw::NormalPiece:
-					renderer->drawPiece(x + state->xOffset + boardXOffset, y + state->yOffset + boardYOffset, playerColor->fillColor, sf::Color::White);
+					renderer->drawPiece(x + xOffset, y + yOffset, playerColor->fillColor, sf::Color::White);
 					break;
 				case PieceToDraw::GhostPiece:
-					renderer->drawPiece(x + state->xOffset + boardXOffset, y + state->yOffset + boardYOffset + ghostPieceOffset, playerColor->ghostFillColor, m_ghostOutlineColor);
+					renderer->drawPiece(x + xOffset, y + yOffset + ghostPieceOffset, playerColor->ghostFillColor, m_ghostOutlineColor);
+					break;
+				case PieceToDraw::HeldPiece:
+					renderer->drawPiece(x + xOffset, y + yOffset, playerColor->fillColor, sf::Color::White);
+					break;
+				case PieceToDraw::NextPiece:
+					renderer->drawPiece(x + xOffset, y + yOffset, playerColor->fillColor, sf::Color::White);
 					break;
 				}
 			}

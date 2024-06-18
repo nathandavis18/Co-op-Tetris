@@ -16,7 +16,7 @@ public:
 	void clearRenderer();
 	void showRenderer();
 	void drawBorder(const u8 gameWidth, const u8 gameHeight);
-	void drawPiece(const u16 x, const u16 y, const sf::Color fill, const sf::Color outline);
+	void drawPiece(const s8 x, const s8 y, const sf::Color fill, const sf::Color outline);
 	void drawText(const u16 x, const u16 y, const std::string& strToDisplay);
 private:
 	sf::Font m_font;

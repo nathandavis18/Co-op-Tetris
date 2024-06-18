@@ -22,7 +22,7 @@ private:
 
 	static constexpr u8 m_baseWidth = 10;
 	static constexpr double m_scalingFactor = 3.4;
-	static constexpr u8 pieceSize = 30;
+	static constexpr u8 pieceSize = 25;
 	static constexpr u8 gameHeight = 20;
 	static constexpr u8 boardHeight = 22;
 
@@ -32,7 +32,7 @@ private:
 
 	u8 m_numPlayers;
 	u8 gameWidth;
-	u16 gameWindowWidth, gameWindowHeight, boardXOffset, boardYOffset;
+	u16 gameWindowWidth, gameWindowHeight;
 
 	sf::Image bgImage;
 };
