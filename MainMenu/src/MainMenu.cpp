@@ -1,13 +1,7 @@
 #include "../Headers/MainMenu.hpp"
 
 MainMenu::MainMenu() : m_numPlayers(1), window(sf::VideoMode(mainMenuWindowWidth, mainMenuWindowHeight), "TETRIS"), m_eventHandler(&window) {
-	sf::RectangleShape backgroundRect;
-	backgroundRect.setFillColor(sf::Color::Black);
-	backgroundRect.setSize(sf::Vector2f(mainMenuWindowWidth, mainMenuWindowHeight));
-	backgroundRect.setPosition(sf::Vector2f(0, 0));
-
 	window.clear();
-	window.draw(backgroundRect);
 	window.display();
 	showMainMenu();
 }

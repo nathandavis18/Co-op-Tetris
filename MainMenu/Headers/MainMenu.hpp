@@ -1,6 +1,7 @@
 #pragma once
 #include <fstream>
-#include <SFML/Graphics.hpp>
+#include <SFML/Window.hpp>
+#include <SFML/Graphics/Image.hpp>
 
 #include "../../Headers/Globals.hpp"
 #include "../../Headers/Game.hpp"
