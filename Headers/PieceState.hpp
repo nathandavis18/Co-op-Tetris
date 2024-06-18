@@ -11,7 +11,8 @@ public:
 	/// </summary>
 	static struct Piece {
 		Piece() : width(0), data(0) {}
-		Piece(std::vector<u8> data, u8 width) : width(width), data(data) {}
+		Piece(const std::vector<u8> data, const u8 width) : width(width), data(data) {}
+
 		std::vector<u8> data;
 		u8 width;
 	};
@@ -28,8 +29,8 @@ public:
 	};
 
 public:
-	void renderPiece(Renderer*, std::unique_ptr<State>&, PlayerColor*, PieceToDraw, u16 boardXOffset, u16 boardYOffset, u8 ghostPieceOffset = 0);
-	bool getPieceData(u8 x, u8 y, std::unique_ptr<Piece>&, u8 rotation);
+	void renderPiece(Renderer* const, const std::unique_ptr<State>&, PlayerColor* const, const PieceToDraw, const u16 boardXOffset, const u16 boardYOffset, const u8 ghostPieceOffset = 0);
+	bool getPieceData(const u8 x, const u8 y, const std::unique_ptr<Piece>&, const u8 rotation);
 
 private:
 	const sf::Color m_ghostOutlineColor = sf::Color(50, 50, 50, 50);

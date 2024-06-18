@@ -7,7 +7,7 @@
 /// Initializes the window pointer
 /// </summary>
 /// <param name="window">A pointer to the main window</param>
-Renderer::Renderer(const u8 pieceSize, sf::RenderWindow* window) : m_pieceSize(pieceSize), m_window(window) { }
+Renderer::Renderer(const u8 pieceSize, sf::RenderWindow* const window) : m_pieceSize(pieceSize), m_window(window) { }
 
 /// <summary>
 /// Clears the renderer
@@ -23,7 +23,7 @@ void Renderer::showRenderer() {
 	m_window->display();
 }
 
-void Renderer::drawBorder(u8 width, u8 height) {
+void Renderer::drawBorder(const u8 width, const u8 height) {
 	for (u8 x = sideBuffer - 1; x <= width + sideBuffer; ++x) {
 		drawPiece(x, 0, sf::Color::White, sf::Color::Blue);
 		drawPiece(x, height + 1, sf::Color::White, sf::Color::Blue);
@@ -41,7 +41,7 @@ void Renderer::drawBorder(u8 width, u8 height) {
 /// <param name="y">The y position of the piece</param>
 /// <param name="fill">The fill color of the piece</param>
 /// <param name="outline">The outline color of the piece</param>
-void Renderer::drawPiece(const int x, const int y, const sf::Color fill, const sf::Color outline) {
+void Renderer::drawPiece(const u16 x, const u16 y, const sf::Color fill, const sf::Color outline) {
 	sf::RectangleShape rect;
 
 	rect.setFillColor(fill);
@@ -60,7 +60,7 @@ void Renderer::drawPiece(const int x, const int y, const sf::Color fill, const s
 /// <param name="x">The x position of the text</param>
 /// <param name="y">The y position of the text</param>
 /// <param name="strToDisplay">The text to display</param>
-void Renderer::drawText(const int x, const int y, const std::string& strToDisplay) {
+void Renderer::drawText(const u16 x, const u16 y, const std::string& strToDisplay) {
 	if (!m_font.loadFromFile("../../../../Font/tetris-font.ttf")) {
 		std::cout << "Error Loading Font" << std::endl;
 	}

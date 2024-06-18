@@ -21,10 +21,10 @@ struct PlayerMove {
 	u8 player;
 };
 
-const sf::Color RedPlayerGhostFill = sf::Color(150, 0, 0, 100);
-const sf::Color BluePlayerGhostFill = sf::Color(0, 0, 150, 100);
-const sf::Color YellowPlayerGhostFill = sf::Color(150, 150, 0, 100);
-const sf::Color MagentaPlayerGhostFill = sf::Color(100, 0, 50, 100);
+static const sf::Color RedPlayerGhostFill = sf::Color(150, 0, 0, 100);
+static const sf::Color BluePlayerGhostFill = sf::Color(0, 0, 150, 100);
+static const sf::Color YellowPlayerGhostFill = sf::Color(150, 150, 0, 100);
+static const sf::Color MagentaPlayerGhostFill = sf::Color(100, 0, 50, 100);
 
 struct PlayerColor {
 	sf::Color fillColor;

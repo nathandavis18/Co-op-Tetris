@@ -6,11 +6,11 @@
 
 class Board {
 public:
-	Board(u8 width, u8 height);
+	Board(const u8 width, const u8 height);
 	void resetBoard();
-	u8 getBoardPosition(u8 x, u8 y);
-	void setBoardPosition(u8 x, u8 y, u8 value);
-	void renderBoard(Renderer* renderer, std::vector<PlayerColor>& playerColors, u16 boardXOffset, u16 boardYOffset);
+	u8 getBoardPosition(const s8 x, const u8 y);
+	void setBoardPosition(const u8 x, const u8 y, const u8 value);
+	void renderBoard(Renderer* const, const std::vector<PlayerColor>&, const u16 boardXOffset, const u16 boardYOffset);
 private:
 	std::vector<u8> m_board;
 	const u8 m_boardWidth, m_boardHeight;

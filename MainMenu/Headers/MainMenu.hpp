@@ -10,8 +10,8 @@ class MainMenu {
 public:
 	MainMenu();
 	void showMainMenu();
-	void setNumPlayers(u8 numPlayers);
-	void setPlayerControl(u8 player, u8 controllerType, u8 input, u8 moveToMake);
+	void setNumPlayers(const u8 numPlayers);
+	void setPlayerControl(const u8 player, const u8 controllerType, const u8 input, const u8 moveToMake);
 	void calculateGameSizes();
 	void startGame();
 private:
@@ -25,11 +25,13 @@ private:
 	static constexpr u8 gameHeight = 20;
 	static constexpr u8 boardHeight = 22;
 
-	static constexpr u16 mainMenuWindowHeight = 720;
-	static constexpr u16 mainMenuWindowWidth = 1080;
+	static constexpr u16 mainMenuWindowHeight = 600;
+	static constexpr u16 mainMenuWindowWidth = 600;
 
 
 	u8 m_numPlayers;
 	u8 gameWidth;
 	u16 gameWindowWidth, gameWindowHeight, boardXOffset, boardYOffset;
+
+	sf::Image bgImage;
 };

@@ -6,7 +6,7 @@ enum class MainMenuAction{ChangeNumPlayers, ChangeControl, StartGame, None};
 
 class MainMenuEventHandler {
 public:
-	MainMenuEventHandler(sf::Window*);
+	MainMenuEventHandler(sf::Window* const);
 	MainMenuAction handleInput();
 private:
 	sf::Event m_event;

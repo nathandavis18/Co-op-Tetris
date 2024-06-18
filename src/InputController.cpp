@@ -10,7 +10,8 @@
 /// <param name="playerIndex">The player index from the controls layout</param>
 /// <param name="input">The keyboard key code</param>
 /// <param name="moveToMake">What move this input is supposed to make</param>
-InputController::PlayerKeyboardControls::PlayerKeyboardControls(u8 playerIndex, u8 input, u8 moveToMake) : playerIndex(playerIndex), keyboardInput(input), moveToMake(moveToMake) {}
+InputController::PlayerKeyboardControls::PlayerKeyboardControls(const u8 playerIndex, const u8 input, const u8 moveToMake) : 
+	playerIndex(playerIndex), keyboardInput(input), moveToMake(moveToMake) {}
 
 /// <summary>
 /// A constructor used to construct a joystick control input
@@ -18,7 +19,8 @@ InputController::PlayerKeyboardControls::PlayerKeyboardControls(u8 playerIndex, 
 /// <param name="playerIndex">The player index from the controls layout</param>
 /// <param name="input">The keyboard key code</param>
 /// <param name="moveToMake">What move this input is supposed to make</param>
-InputController::PlayerJoystickControls::PlayerJoystickControls(u8 playerIndex, u8 input, u8 moveToMake) : playerIndex(playerIndex), controllerInput(input), moveToMake(moveToMake) {}
+InputController::PlayerJoystickControls::PlayerJoystickControls(const u8 playerIndex, const u8 input, const u8 moveToMake) : 
+	playerIndex(playerIndex), controllerInput(input), moveToMake(moveToMake) {}
 
 /// <summary>
 /// Constructor to initialize the sf::Window pointer to the window address
@@ -26,7 +28,7 @@ InputController::PlayerJoystickControls::PlayerJoystickControls(u8 playerIndex, 
 /// Reads the control layout from the controls.txt file, or sets the values to their default based on the default-controls.txt layout if no controls.txt file is found.
 /// </summary>
 /// <param name="window">A pointer to the main window</param>
-InputController::InputController(sf::Window* window) : m_window(window), m_event(sf::Event()) {
+InputController::InputController(sf::Window* const window) : m_window(window), m_event(sf::Event()) {
 	std::filesystem::path controlsPath = std::filesystem::current_path() / "../../../../Controls/controls.txt";
 	std::filesystem::path defaultControlsPath = std::filesystem::current_path() / "../../../../Controls/default-controls.txt";
 	if (!std::filesystem::exists(controlsPath)) {
@@ -94,7 +96,7 @@ InputController::InputController(sf::Window* window) : m_window(window), m_event
 /// This method completely abstracts the sf::Event information away from the Game class
 /// </summary>
 /// <returns>Returns the move to make and which player made the move</returns>
-PlayerMove InputController::input(bool quit) {
+PlayerMove InputController::input(const bool quit) {
 	PlayerMove pm;
 	pm.move = Move::None;
 
@@ -108,6 +110,7 @@ PlayerMove InputController::input(bool quit) {
 			if (quit) {
 				if (m_event.key.code == sf::Keyboard::F5) {
 					pm.move = Move::PlayAgain;
+					pm.player = 0;
 					return pm;
 				}
 			}

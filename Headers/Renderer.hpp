@@ -9,12 +9,12 @@
 /// </summary>
 class Renderer{
 public:
-	const Renderer(const u8 pieceSize, sf::RenderWindow* window);
+	const Renderer(const u8 pieceSize, sf::RenderWindow* const window);
 	void clearRenderer();
 	void showRenderer();
-	void drawBorder(u8 gameWidth, u8 gameHeight);
-	void drawPiece(const int x, const int y, const sf::Color fill, const sf::Color outline);
-	void drawText(const int x, const int y, const std::string& strToDisplay);
+	void drawBorder(const u8 gameWidth, const u8 gameHeight);
+	void drawPiece(const u16 x, const u16 y, const sf::Color fill, const sf::Color outline);
+	void drawText(const u16 x, const u16 y, const std::string& strToDisplay);
 private:
 	sf::Font m_font;
 	sf::Text m_text;

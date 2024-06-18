@@ -8,13 +8,13 @@
 /// Initialzer for the Game class
 /// Initializes the window, renderer, and input controller, and sets the game up.
 /// </summary>
-Game::Game(u8 numPlayers, u8 gameWidth, u8 gameHeight, u16 boardXOffset, u16 boardYOffset, u16 windowWidth, u16 windowHeight, 
-	sf::RenderWindow* window, Renderer* renderer, Board* board, InputController* inputController, MusicController* musicController, PieceState* pieceState) : 
+Game::Game(const u8 numPlayers, const u8 gameWidth, const u8 gameHeight, const u16 boardXOffset, const u16 boardYOffset, const u16 windowWidth, const u16 windowHeight, 
+	sf::RenderWindow* const window, Renderer* const renderer, Board* const board, InputController* const inputController, 
+	MusicController* const musicController, PieceState* const pieceState, Blocks* const blocks) : 
 	m_numPlayers(numPlayers), m_gameWidth(gameWidth), m_gameHeight(gameHeight), m_boardXOffset(boardXOffset), m_boardYOffset(boardYOffset),
 	m_totalWidth(windowWidth), m_totalHeight(windowHeight), 
-	m_board(board), m_window(window), m_renderer(renderer), m_inputController(inputController), m_musicController(musicController), m_pieceState(pieceState)
+	m_board(board), m_window(window), m_renderer(renderer), m_inputController(inputController), m_musicController(musicController), m_pieceState(pieceState), m_blockGenerator(blocks)
 {
-
 	for (u8 i = 0; i < numPlayers; ++i) {
 		m_playerStates.push_back(std::make_unique<State>(State()));
 		newPiece(i);
@@ -85,8 +85,8 @@ void Game::loop() {
 /// Generates a new piece for the player(s) that have had their piece collide with the board
 /// </summary>
 /// <param name="playerIndex">The current player that needs a new piece</param>
-void Game::newPiece(u8 playerIndex) {
-	m_playerStates[playerIndex]->piece = std::make_unique<Piece>(m_blockGenerator.getBlock());
+void Game::newPiece(const u8 playerIndex) {
+	m_playerStates[playerIndex]->piece = std::make_unique<Piece>(m_blockGenerator->getBlock());
 
 	m_playerStates[playerIndex]->xOffset = ((m_gameWidth * (playerIndex + 1)) / m_numPlayers) - 4;
 	m_playerStates[playerIndex]->yOffset = 0;
@@ -107,7 +107,7 @@ void Game::updateLevel() {
 /// Sets the time for the current player for the next automatic drop of their piece
 /// </summary>
 /// <param name="playerIndex">The current player</param>
-void Game::setTimeNextDrop(u8 playerIndex) {
+void Game::setTimeNextDrop(const u8 playerIndex) {
 	m_timeToNextDrop = m_framesPerDrop[m_level] / framesPerSecond;
 	m_playerTimes[playerIndex] = sf::milliseconds(m_timeToNextDrop * 1000);
 }
@@ -116,13 +116,13 @@ void Game::setTimeNextDrop(u8 playerIndex) {
 /// Adds the dropped piece to the board. Uses the player index in order to maintain piece color
 /// </summary>
 /// <param name="playerIndex">The current player</param>
-void Game::updateBoard(u8 playerIndex) { //Board gets updated when the playing piece collides with the m_board
+void Game::updateBoard(const u8 playerIndex) { //Board gets updated when the playing piece collides with the m_board
 	std::unique_ptr<State>& state = m_playerStates[playerIndex];
-	for (int x = 0; x < state->piece->width; ++x) {
-		for (int y = 0; y < state->piece->width; ++y) {
+	for (u8 x = 0; x < state->piece->width; ++x) {
+		for (u8 y = 0; y < state->piece->width; ++y) {
 			if (m_pieceState->getPieceData(x, y, state->piece, state->rotation)) {
 				s8 bX = state->xOffset + x;
-				s8 bY = state->yOffset + y;
+				u8 bY = state->yOffset + y;
 
 				if (bY >= 0) m_board->setBoardPosition(bX, bY, playerIndex + 1);
 				else m_quit = true;
@@ -137,8 +137,8 @@ void Game::updateBoard(u8 playerIndex) { //Board gets updated when the playing p
 /// </summary>
 /// <param name="y">The row to check</param>
 /// <returns></returns>
-bool Game::isFullRow(int y) {
-	for (int x = 0; x < m_gameWidth; ++x) { //Every tile in a given row
+bool Game::isFullRow(const u8 y) {
+	for (u8 x = 0; x < m_gameWidth; ++x) { //Every tile in a given row
 		if (!m_board->getBoardPosition(x, y))//If a single spot in a row isn't a block we don't need to keep checking it
 			return false;
 	}
@@ -150,9 +150,9 @@ bool Game::isFullRow(int y) {
 /// </summary>
 void Game::clearLines() {
 	m_clearedLines = 0;
-	for (int y = 0; y < m_gameHeight; ++y) { //Every row
+	for (u8 y = 0; y < m_gameHeight; ++y) { //Every row
 		if (isFullRow(y)) {
-			for (int x = 0; x < m_gameWidth; ++x) {
+			for (u8 x = 0; x < m_gameWidth; ++x) {
 				m_board->setBoardPosition(x, y, 0); //If its a full row, we clear it
 			}
 			++m_clearedLines;
@@ -161,8 +161,8 @@ void Game::clearLines() {
 	}
 	m_lines += m_clearedLines; //Updating total amount of lines cleared
 	while (m_clearedLines > 0) { //If we clear 1 line, we drop the rest of the m_board one time. Two times for 2 cleared lines, and so on
-		for (int y = m_yClearLevel; y > 0; --y) {
-			for (int x = 0; x < m_gameWidth; ++x) {
+		for (u8 y = m_yClearLevel; y > 0; --y) {
+			for (u8 x = 0; x < m_gameWidth; ++x) {
 				m_board->setBoardPosition(x, y, m_board->getBoardPosition(x, (y - 1)));
 			}
 		}
@@ -175,12 +175,12 @@ void Game::clearLines() {
 /// </summary>
 /// <param name="playerIndex">The current player</param>
 /// <returns></returns>
-bool Game::hasCollided(u8 playerIndex) {
+bool Game::hasCollided(const u8 playerIndex) {
 	std::unique_ptr<State>& state = m_playerStates[playerIndex];
-	for (int x = 0; x < state->piece->width; ++x) {
-		for (int y = 0; y < state->piece->width; ++y) {
+	for (u8 x = 0; x < state->piece->width; ++x) {
+		for (u8 y = 0; y < state->piece->width; ++y) {
 			if (m_pieceState->getPieceData(x, y, state->piece, state->rotation)) {
-				u8 bX = state->xOffset + x;
+				s8 bX = state->xOffset + x;
 				u8 bY = state->yOffset + y + 1; //Checking the spot below the piece
 				if (bY >= 0 && (m_board->getBoardPosition(bX, bY) || bY >= m_gameHeight)) {
 					return true;
@@ -197,7 +197,7 @@ bool Game::hasCollided(u8 playerIndex) {
 /// </summary>
 /// <returns></returns>
 bool Game::hasLost() {
-	for (int x = 0; x < m_gameWidth; ++x) {
+	for (u8 x = 0; x < m_gameWidth; ++x) {
 		if (m_board->getBoardPosition(x, 0)) {//If there is a piece on the top row, then we lose
 			m_musicController->stopMusic();
 			return true;
@@ -212,13 +212,13 @@ bool Game::hasLost() {
 /// <param name="rotation">The rotation to check</param>
 /// <param name="playerIndex">The player's piece to check</param>
 /// <returns></returns>
-bool Game::canWallKick(u8 rotation, u8 playerIndex) {
+bool Game::canWallKick(const u8 rotation, const u8 playerIndex) {
 	std::unique_ptr<State>& state = m_playerStates[playerIndex];
-	for (int x = 0; x < state->piece->width; ++x) {
-		for (int y = 0; y < state->piece->width; ++y) {
+	for (u8 x = 0; x < state->piece->width; ++x) {
+		for (u8 y = 0; y < state->piece->width; ++y) {
 			if (m_pieceState->getPieceData(x, y, state->piece, rotation)) {
 				s8 bX = state->xOffset + x;
-				s8 bY = state->yOffset + y;
+				u8 bY = state->yOffset + y;
 				if (m_board->getBoardPosition(bX, bY)) {
 					return false;
 				}
@@ -232,13 +232,13 @@ bool Game::canWallKick(u8 rotation, u8 playerIndex) {
 /// Pushes the piece away from the wall if it can.
 /// </summary>
 /// <param name="playerIndex">The current player's piece</param>
-void Game::wallKick(u8 playerIndex) {
+void Game::wallKick(const u8 playerIndex) {
 	std::unique_ptr<State>& state = m_playerStates[playerIndex];
-	for (int x = 0; x < state->piece->width; ++x) {
-		for (int y = 0; y < state->piece->width; ++y) {
+	for (u8 x = 0; x < state->piece->width; ++x) {
+		for (u8 y = 0; y < state->piece->width; ++y) {
 			if (m_pieceState->getPieceData(x, y, state->piece, state->rotation)) {
 				s8 bX = state->xOffset + x;
-				s8 bY = state->yOffset + y;
+				u8 bY = state->yOffset + y;
 				if (bX < 0) {
 					state->xOffset -= bX;
 				}
@@ -259,12 +259,12 @@ void Game::wallKick(u8 playerIndex) {
 /// <param name="move">The move needing to be checked</param>
 /// <param name="playerIndex">The player making the move</param>
 /// <returns></returns>
-bool Game::isValidMove(Move move, u8 playerIndex) { //Can't move into the m_board or another piece
+bool Game::isValidMove(const Move move, const u8 playerIndex) { //Can't move into the m_board or another piece
 	std::unique_ptr<State>& state = m_playerStates[playerIndex];
-	for (int x = 0; x < state->piece->width; ++x) {
-		for (int y = 0; y < state->piece->width; ++y) {
+	for (u8 x = 0; x < state->piece->width; ++x) {
+		for (u8 y = 0; y < state->piece->width; ++y) {
 			if (m_pieceState->getPieceData(x, y, state->piece, state->rotation)) {
-				u8 bX = state->xOffset + x;
+				s8 bX = state->xOffset + x;
 				u8 bY = state->yOffset + y;
 
 				if ((bX <= 0 || m_board->getBoardPosition(bX - 1, bY)) && move == Move::Left)
@@ -328,16 +328,16 @@ void Game::input() {
 /// </summary>
 /// <param name="playerIndex">The current player's piece</param>
 /// <returns>The amount that the piece can go down</returns>
-u8 Game::getBottom(u8 playerIndex) {
+u8 Game::getBottom(const u8 playerIndex) {
 	u8 checkAmount;
 	u8 finalAmount = m_gameHeight;
 	std::unique_ptr<State>& state = m_playerStates[playerIndex];
-	for (int x = 0; x < state->piece->width; ++x) {
-		for (int y = 0; y < state->piece->width; ++y) {
+	for (u8 x = 0; x < state->piece->width; ++x) {
+		for (u8 y = 0; y < state->piece->width; ++y) {
 			if (m_pieceState->getPieceData(x, y, state->piece, state->rotation)) {
 				checkAmount = 0;
 				s8 bX = state->xOffset + x;
-				s8 bY = state->yOffset + y + 1;
+				u8 bY = state->yOffset + y + 1;
 				while (!m_board->getBoardPosition(bX, bY) && bY < m_gameHeight) {
 					++checkAmount;
 					++bY;
@@ -355,7 +355,7 @@ u8 Game::getBottom(u8 playerIndex) {
 /// Method used for hard dropping a piece
 /// </summary>
 /// <param name="playerIndex">The player dropping the piece</param>
-void Game::dropPiece(u8 playerIndex) {
+void Game::dropPiece(const u8 playerIndex) {
 	m_playerStates[playerIndex]->yOffset += getBottom(playerIndex);
 	m_playerTimes[playerIndex] = sf::milliseconds(0);
 }

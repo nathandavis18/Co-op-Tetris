@@ -1,6 +1,14 @@
 #include "../Headers/MainMenu.hpp"
 
 MainMenu::MainMenu() : m_numPlayers(1), window(sf::VideoMode(mainMenuWindowWidth, mainMenuWindowHeight), "TETRIS"), m_eventHandler(&window) {
+	sf::RectangleShape backgroundRect;
+	backgroundRect.setFillColor(sf::Color::Black);
+	backgroundRect.setSize(sf::Vector2f(mainMenuWindowWidth, mainMenuWindowHeight));
+	backgroundRect.setPosition(sf::Vector2f(0, 0));
+
+	window.clear();
+	window.draw(backgroundRect);
+	window.display();
 	showMainMenu();
 }
 
@@ -8,18 +16,25 @@ void MainMenu::showMainMenu() {
 	while (window.isOpen()) {
 		switch (m_eventHandler.handleInput()) {
 		case MainMenuAction::StartGame:
-			setNumPlayers(m_numPlayers);
 			startGame();
+			break;
+		case MainMenuAction::ChangeControl:
+			break;
+		case MainMenuAction::ChangeNumPlayers:
+			setNumPlayers(4);
+			break;
+		default:
+			break;
 		}
 
 	}
 }
 
-void MainMenu::setNumPlayers(u8 numPlayers) {
+void MainMenu::setNumPlayers(const u8 numPlayers) {
 	m_numPlayers = numPlayers;
 }
 
-void MainMenu::setPlayerControl(u8 player, u8 controllerType, u8 input, u8 moveToMake) {
+void MainMenu::setPlayerControl(const u8 player, const u8 controllerType, const u8 input, const u8 moveToMake) {
 	return;
 }
 
@@ -41,5 +56,6 @@ void MainMenu::startGame() {
 	InputController mainInputController = InputController(&gameWindow);
 	MusicController mainMusicController;
 	PieceState mainPieceState;
-	Game game(m_numPlayers, gameWidth, gameHeight, boardXOffset, boardYOffset, gameWindowWidth, gameWindowHeight, &gameWindow, &mainRenderer, &mainBoard, &mainInputController, &mainMusicController, &mainPieceState);
+	Blocks mainBlockGenerator;
+	Game game(m_numPlayers, gameWidth, gameHeight, boardXOffset, boardYOffset, gameWindowWidth, gameWindowHeight, &gameWindow, &mainRenderer, &mainBoard, &mainInputController, &mainMusicController, &mainPieceState, &mainBlockGenerator);
 }
