@@ -15,7 +15,7 @@ void MainMenu::showMainMenu() {
 		case MainMenuAction::ChangeControl:
 			break;
 		case MainMenuAction::ChangeNumPlayers:
-			setNumPlayers(3);
+			setNumPlayers(4);
 			break;
 		default:
 			break;
