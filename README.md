@@ -67,7 +67,7 @@ The game board size scales with the number of players, so 1 player is normal tet
     Y -> Hold Piece
 
 ## Building
-CMake is the build system for this project, for your convenience. You will need Cmake Version 3.16 or later to build.
+CMake is the build system for this project. You will need CMake Version 3.16 or later to build.
 
 To build this project, run
 
