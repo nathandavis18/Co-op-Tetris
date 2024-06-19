@@ -66,6 +66,22 @@ The game board size scales with the number of players, so 1 player is normal tet
     A -> Hard Drop
     Y -> Hold Piece
 
-
-
+## Building
 CMake is the build system for this project, for your convenience. You will need Cmake Version 3.16 or later to build.
+
+To build this project, run
+
+    cmake -B {buildDirectory} -S {pathToSource} -DCMAKE_BUILD_TYPE:STRING="Release"
+    cmake --build {buildDirectory}
+
+If you are in the source directory (the folder that contains the CMakeLists.txt file), then you can just run
+
+    cmake -B {buildDirectory} -DCMAKE_BUILD_TYPE:STRING="Release"
+    cmake --build {buildDirectory}
+
+An example of building (while in the source directory) would be:
+
+    cmake -B "./out/build" -DCMAKE_BUILD_TYPE:STRING="Release"
+    cmake --build "./out/build"
+
+This has only been tested on Windows, using both Ninja for Visual Studio and the Visual Studio 17 2022 build generators and the MSVC C++ compiler. Untested on Linux and Mac and other C++ compilers. 
