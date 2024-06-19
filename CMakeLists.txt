@@ -45,3 +45,12 @@ if(WIN32)
         PRE_BUILD COMMAND ${CMAKE_COMMAND} -E copy ${SFML_SOURCE_DIR}/extlibs/bin/$<IF:$<EQUAL:${CMAKE_SIZEOF_VOID_P},8>,x64,x86>/openal32.dll $<TARGET_FILE_DIR:Tetris>
         VERBATIM)
 endif()
+
+add_custom_command(
+    TARGET Tetris
+    COMMENT "Copy Required Files"
+    PRE_BUILD COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_SOURCE_DIR}/Controls/controls.txt $<TARGET_FILE_DIR:Tetris>
+    PRE_BUILD COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_SOURCE_DIR}/Controls/default-controls.txt $<TARGET_FILE_DIR:Tetris>
+    PRE_BUILD COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_SOURCE_DIR}/Font/tetris-font.ttf $<TARGET_FILE_DIR:Tetris>
+    PRE_BUILD COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_SOURCE_DIR}/Music/Tetris-Theme.ogg $<TARGET_FILE_DIR:Tetris>
+    VERBATIM)

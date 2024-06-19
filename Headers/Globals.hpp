@@ -1,7 +1,7 @@
 #pragma once
 #include <cstdint>
 
-#include<SFML/Graphics/Color.hpp>
+#include <SFML/Graphics/Color.hpp>
 
 using u8 = std::uint8_t;
 using u16 = std::uint16_t;

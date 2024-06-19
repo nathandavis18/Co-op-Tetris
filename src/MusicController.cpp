@@ -5,7 +5,7 @@
 /// Also turns down the volume so it isn't too loud.
 /// </summary>
 MusicController::MusicController() : musicAvailable(true) {
-	if (!m_theme.openFromFile("../../../../Music/Tetris-Theme.ogg")) {
+	if (!m_theme.openFromFile("./Tetris-Theme.ogg")) {
 		musicAvailable = false;
 	}
 	else {

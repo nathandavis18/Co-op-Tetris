@@ -61,7 +61,7 @@ void Renderer::drawPiece(const s8 x, const s8 y, const sf::Color fill, const sf:
 /// <param name="y">The y position of the text</param>
 /// <param name="strToDisplay">The text to display</param>
 void Renderer::drawText(const u16 x, const u16 y, const std::string& strToDisplay) {
-	if (!m_font.loadFromFile("../../../../Font/tetris-font.ttf")) {
+	if (!m_font.loadFromFile("./tetris-font.ttf")) {
 		std::cout << "Error Loading Font" << std::endl;
 	}
 	else {

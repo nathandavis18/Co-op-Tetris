@@ -29,8 +29,8 @@ InputController::PlayerJoystickControls::PlayerJoystickControls(const u8 playerI
 /// </summary>
 /// <param name="window">A pointer to the main window</param>
 InputController::InputController(sf::Window* const window) : m_window(window), m_event(sf::Event()) {
-	std::filesystem::path controlsPath = std::filesystem::current_path() / "../../../../Controls/controls.txt";
-	std::filesystem::path defaultControlsPath = std::filesystem::current_path() / "../../../../Controls/default-controls.txt";
+	std::filesystem::path controlsPath = std::filesystem::current_path() / "./controls.txt";
+	std::filesystem::path defaultControlsPath = std::filesystem::current_path() / "./default-controls.txt";
 	if (!std::filesystem::exists(controlsPath)) {
 		std::ifstream defaultControlsFile(defaultControlsPath);
 		if (!defaultControlsFile.is_open()) {
