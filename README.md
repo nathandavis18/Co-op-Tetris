@@ -84,4 +84,6 @@ An example of building (while in the source directory) would be:
     cmake -B "./out/build" -DCMAKE_BUILD_TYPE:STRING="Release"
     cmake --build "./out/build"
 
+After building the project, you will find the executable in the /bin or /bin/Debug folder of the {buildDirectory} specified above.
+
 This has only been tested on Windows, using both Ninja for Visual Studio and the Visual Studio 17 2022 build generators and the MSVC C++ compiler. Untested on Linux and Mac and other C++ compilers. 
