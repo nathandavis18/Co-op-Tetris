@@ -8,6 +8,8 @@ Currently, there is no way to change the controls, though that is a feature I am
 
 To choose the number of players, just click 1, 2, 3, or 4 on your keyboard. The game starts immediately after as there is currently no Main Menu GUI.
 
+If you lose and would like to restart the game with the same number of players, just press F5. Currently, the only way to change the number of players is to exit the game and reopen it.
+
 The game board size scales with the number of players. One player has a normal sized Tetris board, and it scales linearly to double the size for 4 players!
 
 ## Current Features
