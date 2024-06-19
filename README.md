@@ -29,11 +29,8 @@ The game board size scales with the number of players, so 1 player is normal tet
     Right Arrow -> Right
     Up Arrow -> Rotate
     Down Arrow -> Soft Drop
-    Page Down -> Hard Drop
-
-    or
-
-    Space -> Hard Drop
+    Page Down/Space -> Hard Drop
+    Delete -> Hold Piece
 
 #### Player Two
     A -> Left
@@ -41,6 +38,7 @@ The game board size scales with the number of players, so 1 player is normal tet
     W -> Rotate
     S -> Soft Drop
     R -> Hard Drop
+    Q -> Hold Piece
 
 #### Player Three
     J -> Left
@@ -48,6 +46,7 @@ The game board size scales with the number of players, so 1 player is normal tet
     I -> Rotate
     K -> Soft Drop
     P -> Hard Drop
+    U -> Hold Piece
 
 #### Player Four
     Numpad4 -> Left
@@ -55,15 +54,18 @@ The game board size scales with the number of players, so 1 player is normal tet
     Numpad8 -> Rotate
     Numpad5 -> Soft Drop
     Numpad+ -> Hard Drop
+    Numpad7 -> Hold Piece
 
-    or alternatively if you have a controller
+    or alternatively if you have a controller 
+    (Only tested with Nintendo Switch Controller since that is all I have)
 
     DPad Left -> Left
     DPad Right -> Right
     X -> Rotate
     DPad Down -> Soft Drop
     A -> Hard Drop
+    Y -> Hold Piece
 
 
 
-CMake is the build system for this project, for your convenience. You will need vcpkg and cmake Version 3.16 or later to build.
+CMake is the build system for this project, for your convenience. You will need Cmake Version 3.16 or later to build.

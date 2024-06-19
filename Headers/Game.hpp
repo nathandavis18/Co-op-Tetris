@@ -1,4 +1,5 @@
 #pragma once
+#include <vector>
 #include <array>
 
 #include "Globals.hpp"
@@ -7,6 +8,7 @@
 #include "Renderer.hpp"
 #include "MusicController.hpp"
 #include "InputController.hpp"
+#include "Board.hpp"
 
 using State = PieceState::State;
 using Piece = PieceState::Piece;
@@ -17,46 +19,40 @@ using Piece = PieceState::Piece;
 /// </summary>
 class Game{
 public:
-	Game();
+	Game(const u8 numPlayers, const u8 gameWidth, const u8 gameHeight, const u16 boardXOffset, const u16 boardYOffset, const u16 windowWidth, const u16 windowHeight, 
+			sf::RenderWindow* const, Renderer* const, Board* const, InputController* const, MusicController* const, PieceState* const, Blocks* const);
+private: //Private functions - Only the game class should be calling these
 	void loop();
 
-	void newPiece(u8 playerIndex);
-	bool getPieceData(u8 x, u8 y, std::unique_ptr<Piece>&, u8 rotation);
-	
+	void newPiece(const u8 playerIndex);
+
 	void updateLevel();
-	void setTimeNextDrop(u8 playerIndex);
-	void updateBoard(u8 playerIndex);
-	bool isFullRow(int y);
+	void setTimeNextDrop(const u8 playerIndex);
+	void updateBoard(const u8 playerIndex);
+	bool isFullRow(const u8 y);
 	void clearLines();
 
-	bool hasCollided(u8 playerIndex);
+	bool hasCollided(const u8 playerIndex);
 	bool hasLost();
-	
-	bool canWallKick(u8 rotation, u8 playerIndex);
-	void wallKick(u8 playerIndex);
 
-	bool isValidMove(Move move, u8 playerIndex);
+	bool canWallKick(const u8 rotation, const u8 playerIndex);
+	void wallKick(const u8 playerIndex);
+
+	bool isValidMove(const Move move, const u8 playerIndex);
 	void input();
-	void dropPiece(u8 playerIndex);
-	u8 getBottom(u8 playerIndex);
+	void dropPiece(const u8 playerIndex);
+	u8 getBottom(const u8 playerIndex);
+	void holdPiece(const u8 playerIndex);
+	u8 getPlayerXOffset(const u8 playerIndex, const u8 pieceWidth);
+
 
 	void renderGame();
-	void renderPiece(PieceToDraw piece, u8 playerIndex, u8 ghostPieceOffset = 0);
-	void renderBoard();
-	void renderBorder();
 	void renderText();
-
-private: //Private function/struct
 	void restart();
-
-	struct PlayerColor {
-		sf::Color fillColor;
-		sf::Color ghostFillColor;
-	};
 
 private: //Private variables
 	bool m_quit = false;
-	std::array<u16, gameWidth * boardHeight> m_board;
+	const u8 m_numPlayers;
 
 	static constexpr u8 linesToNextLevel = 10;
 	u8 m_level = 0;
@@ -64,27 +60,30 @@ private: //Private variables
 	u8 m_clearedLines = 0;
 	u8 m_yClearLevel = 0;
 
-	static constexpr double framesPerSecond = 60.0;
-	std::array<u8, 30> m_framesPerDrop = { //From the tetris wiki
+	static constexpr double m_framesPerSecond = 60.0;
+	const std::array<u8, 30> m_framesPerDrop = { //From the tetris wiki
 		48, 43, 38, 33, 28, 23, 18, 13, 8, 6,
 		5, 5, 5, 4, 4, 4, 3, 3, 3, 2, 2, 2, 2,
 		2, 2, 2, 2, 2, 2, 1
 	};
-	double m_timeToNextDrop = m_framesPerDrop[m_level] / framesPerSecond;
+	double m_timeToNextDrop;
 
-	sf::RenderWindow m_window;
-	Renderer m_renderer;
-	MusicController m_musicController;
-	InputController m_inputController;
+	sf::RenderWindow* const m_window;
+	Renderer* const m_renderer;
+	MusicController* const m_musicController;
+	InputController* const m_inputController;
+	Board* const m_board;
+	PieceState* const m_pieceState;
+	Blocks* const m_blockGenerator;
 	
+	std::vector<std::unique_ptr<State>> m_playerStates;
 
-	std::array<std::unique_ptr<State>, numPlayers> m_pieceStates;
-	Blocks m_blockGenerator;
-
-	std::array<sf::Time, numPlayers> m_playerTimes;
+	std::vector<sf::Time> m_playerTimes;
 	sf::Clock m_clock;
 
-	std::array<PlayerColor, numPlayers> m_playerColors;
-    const sf::Color ghostOutlineColor = sf::Color(50, 50, 50, 50);
+	std::vector<PlayerColor> m_playerColors;
+
+	const u16 m_gameWidth, m_gameHeight, m_totalWidth, m_totalHeight;
+	const u16 m_boardXOffset, m_boardYOffset;
 };
 

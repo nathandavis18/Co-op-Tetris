@@ -1,5 +1,5 @@
 #pragma once
-#include <SFML/Graphics.hpp>
+#include <SFML/Window.hpp>
 #include <fstream>
 
 #include "Globals.hpp"
@@ -9,17 +9,17 @@
 /// </summary>
 class InputController {
 public:
-	InputController(sf::Window*);
-	PlayerMove input(bool = false);
+	InputController(sf::Window* const);
+	PlayerMove input(const bool = false);
 private:
 	struct PlayerKeyboardControls {
-		PlayerKeyboardControls(u8 playerIndex, u8 input, u8 moveToMake);
+		PlayerKeyboardControls(const u8 playerIndex, const u8 input, const u8 moveToMake);
 		u8 playerIndex;
 		u8 keyboardInput;
 		u8 moveToMake;
 	};
 	struct PlayerJoystickControls {
-		PlayerJoystickControls(u8 playerIndex, u8 input, u8 moveToMake);
+		PlayerJoystickControls(const u8 playerIndex, const u8 input, const u8 moveToMake);
 		u8 playerIndex;
 		u8 controllerInput;
 		u8 moveToMake;

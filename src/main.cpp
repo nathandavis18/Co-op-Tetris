@@ -1,7 +1,6 @@
-#include "../Headers/Game.hpp"
+#include "../MainMenu/Headers/MainMenu.hpp"
 
 int main() {
-	static_assert(numPlayers >= 1 && numPlayers <= 4, "numPlayers must be between 1-4.");
-	Game game;
+	MainMenu mainMenu;
 	return 0;
 }
