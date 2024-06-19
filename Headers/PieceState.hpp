@@ -25,10 +25,10 @@ public:
 		std::unique_ptr<Piece> nextPiece;
 		std::unique_ptr<Piece> heldPiece;
 
-		u8 rotation = 0;
-		s8 xOffset = 0;
-		u8 yOffset = 0;
-		bool canHoldPiece = true;
+		u8 rotation;
+		s8 xOffset;
+		u8 yOffset;
+		bool canHoldPiece;
 	};
 
 public:

@@ -41,8 +41,10 @@ private: //Private functions - Only the game class should be calling these
 	bool isValidMove(const Move move, const u8 playerIndex);
 	void input();
 	void dropPiece(const u8 playerIndex);
-	void holdPiece(const u8 playerIndex);
 	u8 getBottom(const u8 playerIndex);
+	void holdPiece(const u8 playerIndex);
+	u8 getPlayerXOffset(const u8 playerIndex, const u8 pieceWidth);
+
 
 	void renderGame();
 	void renderText();

@@ -22,7 +22,7 @@ private:
 
 	static constexpr u8 m_baseWidth = 10;
 	static constexpr double m_scalingFactor = 3.4;
-	static constexpr u8 pieceSize = 25;
+	static constexpr u8 pieceSize = 28;
 	static constexpr u8 gameHeight = 20;
 	static constexpr u8 boardHeight = 22;
 

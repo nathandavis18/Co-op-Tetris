@@ -15,25 +15,25 @@ Game::Game(const u8 numPlayers, const u8 gameWidth, const u8 gameHeight, const u
 	m_gameWidth(gameWidth), m_gameHeight(gameHeight), m_boardXOffset(boardXOffset), m_boardYOffset(boardYOffset), m_totalWidth(windowWidth), m_totalHeight(windowHeight), 
 	m_board(board), m_window(window), m_renderer(renderer), m_inputController(inputController), m_musicController(musicController), m_pieceState(pieceState), m_blockGenerator(blocks)
 {
-	for (u8 i = 0; i < numPlayers; ++i) {
+	for (u8 playerIndex = 0; playerIndex < numPlayers; ++playerIndex) {
 		m_playerStates.push_back(std::make_unique<State>(State()));
-		m_playerStates[i]->nextPiece = std::make_unique<Piece>(m_blockGenerator->getBlock());
-		newPiece(i);
+		m_playerStates[playerIndex]->nextPiece = std::make_unique<Piece>(m_blockGenerator->getBlock());
+		newPiece(playerIndex);
 
 		PlayerColor pc;
-		if (i == 0) {
+		if (playerIndex == 0) {
 			pc.fillColor = sf::Color::Red;
 			pc.ghostFillColor = RedPlayerGhostFill;
 		}
-		else if (i == 1) {
+		else if (playerIndex == 1) {
 			pc.fillColor = sf::Color::Blue;
 			pc.ghostFillColor = BluePlayerGhostFill;
 		}
-		else if (i == 2) {
+		else if (playerIndex == 2) {
 			pc.fillColor = sf::Color::Yellow;
 			pc.ghostFillColor = YellowPlayerGhostFill;
 		}
-		else if (i == 3) {
+		else if (playerIndex == 3) {
 			pc.fillColor = sf::Color::Magenta;
 			pc.ghostFillColor = MagentaPlayerGhostFill;
 		}
@@ -87,12 +87,15 @@ void Game::loop() {
 /// </summary>
 /// <param name="playerIndex">The current player that needs a new piece</param>
 void Game::newPiece(const u8 playerIndex) {
-	m_playerStates[playerIndex]->piece = std::move(m_playerStates[playerIndex]->nextPiece);
-	m_playerStates[playerIndex]->nextPiece = std::make_unique<Piece>(m_blockGenerator->getBlock());
+	std::unique_ptr<State>& state = m_playerStates[playerIndex];
 
-	m_playerStates[playerIndex]->xOffset = ((m_gameWidth * (playerIndex + 1)) / m_numPlayers) - 4;
-	m_playerStates[playerIndex]->yOffset = 0;
-	m_playerStates[playerIndex]->rotation = 0;
+	state->piece = std::move(state->nextPiece);
+	state->nextPiece = std::make_unique<Piece>(m_blockGenerator->getBlock());
+
+	state->xOffset = getPlayerXOffset(playerIndex, state->piece->width);
+	state->yOffset = 0;
+	state->rotation = 0;
+	state->canHoldPiece = true;
 }
 
 /// <summary>
@@ -367,19 +370,24 @@ void Game::dropPiece(const u8 playerIndex) {
 }
 
 void Game::holdPiece(const u8 playerIndex) {
-	if (m_playerStates[playerIndex]->canHoldPiece) {
-		if (m_playerStates[playerIndex]->heldPiece == nullptr) {
-			m_playerStates[playerIndex]->heldPiece = std::move(m_playerStates[playerIndex]->piece);
+	std::unique_ptr<State>& state = m_playerStates[playerIndex];
+	if (state->canHoldPiece) {
+		if (state->heldPiece == nullptr) {
+			state->heldPiece = std::move(state->piece);
 			newPiece(playerIndex);
 		}
 		else {
-			std::iter_swap(m_playerStates[playerIndex]->piece.get(), m_playerStates[playerIndex]->heldPiece.get());
-			m_playerStates[playerIndex]->canHoldPiece = false;
+			std::iter_swap(state->piece.get(), state->heldPiece.get());
+			state->canHoldPiece = false;
+			state->xOffset = getPlayerXOffset(playerIndex, state->piece->width);
+			state->rotation = 0;
+			state->yOffset = 0;
 		}
-		m_playerStates[playerIndex]->rotation = 0;
-		m_playerStates[playerIndex]->xOffset = 0;
-		m_playerStates[playerIndex]->yOffset = 0;
 	}
+}
+
+u8 Game::getPlayerXOffset(const u8 playerIndex, const u8 pieceWidth) {
+	return static_cast<u8>((((m_gameWidth * (playerIndex * 2 + 1)) / m_numPlayers) >> 1)) - static_cast<u8>((pieceWidth >> 1));
 }
 
 /// <summary>
@@ -394,10 +402,13 @@ void Game::renderGame() {
 		u8 ghostPieceOffset = getBottom(playerIndex);
 		m_pieceState->renderPiece(m_renderer, state->piece, state->rotation, state->xOffset, state->yOffset, &m_playerColors[playerIndex], PieceToDraw::GhostPiece, ghostPieceOffset);
 
+		m_pieceState->renderPiece(m_renderer, state->nextPiece, 0, getPlayerXOffset(playerIndex, state->nextPiece->width), 
+			-verticalBuffer + 1 - (state->nextPiece->width / 4), &m_playerColors[playerIndex], PieceToDraw::NextPiece);
+
 		if (state->heldPiece != nullptr) {
-			m_pieceState->renderPiece(m_renderer, state->heldPiece, 0, ((m_gameWidth * (playerIndex + 1)) / m_numPlayers) - 4, -verticalBuffer, &m_playerColors[playerIndex], PieceToDraw::HeldPiece);
+			m_pieceState->renderPiece(m_renderer, state->heldPiece, 0, getPlayerXOffset(playerIndex, state->heldPiece->width), 
+				m_gameHeight + 2, &m_playerColors[playerIndex], PieceToDraw::HeldPiece);
 		}
-		m_pieceState->renderPiece(m_renderer, state->nextPiece, 0, ((m_gameWidth * (playerIndex + 1)) / m_numPlayers) - 4, m_gameHeight + 2, &m_playerColors[playerIndex], PieceToDraw::NextPiece);
 
 	}
 	m_board->renderBoard(m_renderer, m_playerColors);
@@ -415,8 +426,8 @@ void Game::renderText() {
 	std::string linesStr = "Lines: " + std::to_string(m_lines);
 	m_renderer->drawText(m_totalWidth - 150, m_totalHeight / 2 - 25, lvlStr);
 	m_renderer->drawText(m_totalWidth - 150, m_totalHeight / 2 + 25, linesStr);
-	m_renderer->drawText(100, 50, "Held: ");
-	m_renderer->drawText(100, m_totalHeight - 100, "Next: ");
+	m_renderer->drawText(100, 50, "Next: ");
+	m_renderer->drawText(100, m_totalHeight - 100, "Held: ");
 }
 
 /// <summary>
