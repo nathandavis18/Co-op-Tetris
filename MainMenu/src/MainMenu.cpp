@@ -1,9 +1,15 @@
 #include "../Headers/MainMenu.hpp"
 
 MainMenu::MainMenu() : m_numPlayers(1), window(sf::VideoMode(mainMenuWindowWidth, mainMenuWindowHeight), "TETRIS"), m_eventHandler(&window) {
-	window.clear();
+	/*window.clear();
 	window.display();
-	showMainMenu();
+	showMainMenu();*/
+
+	static constexpr u8 numPlayers = 4;
+	static_assert(numPlayers >= 1 && numPlayers <= 4, "numPlayers must be >= 1 and <= 4");
+
+	setNumPlayers(numPlayers);
+	startGame();
 }
 
 void MainMenu::showMainMenu() {
