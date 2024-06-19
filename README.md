@@ -2,9 +2,13 @@
 
 ![Gameplay Demo Image](Images/Gameplay.png?raw=true "Gameplay")
 
-This is a multiplayer version of Tetris that supports up to 4 players! Game is playable, though to change the controls and number of players you currently have to change them directly in the code.
+This is a multiplayer version of Tetris that supports up to 4 players!
 
-The game board size scales with the number of players, so 1 player is normal tetris size, 2 players is slightly bigger, etc.
+Currently, there is no way to change the controls, though that is a feature I am currently working on.
+
+To choose the number of players, just click 1, 2, 3, or 4 on your keyboard. The game starts immediately after as there is currently no Main Menu GUI.
+
+The game board size scales with the number of players. One player has a normal sized Tetris board, and it scales linearly to double the size for 4 players!
 
 ## Current Features
     Support for up to 4 players
