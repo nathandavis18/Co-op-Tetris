@@ -43,7 +43,7 @@ private: //Private functions - Only the game class should be calling these
 	void dropPiece(const u8 playerIndex);
 	u8 getBottom(const u8 playerIndex);
 	void holdPiece(const u8 playerIndex);
-	u8 getPlayerXOffset(const u8 playerIndex, const u8 pieceWidth);
+	u8 getPlayerStartingXOffset(const u8 playerIndex, const u8 pieceWidth);
 
 
 	void renderGame();

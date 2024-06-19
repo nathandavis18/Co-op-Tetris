@@ -92,7 +92,7 @@ void Game::newPiece(const u8 playerIndex) {
 	state->piece = std::move(state->nextPiece);
 	state->nextPiece = std::make_unique<Piece>(m_blockGenerator->getBlock());
 
-	state->xOffset = getPlayerXOffset(playerIndex, state->piece->width);
+	state->xOffset = getPlayerStartingXOffset(playerIndex, state->piece->width);
 	state->yOffset = 0;
 	state->rotation = 0;
 	state->canHoldPiece = true;
@@ -379,14 +379,14 @@ void Game::holdPiece(const u8 playerIndex) {
 		else {
 			std::iter_swap(state->piece.get(), state->heldPiece.get());
 			state->canHoldPiece = false;
-			state->xOffset = getPlayerXOffset(playerIndex, state->piece->width);
+			state->xOffset = getPlayerStartingXOffset(playerIndex, state->piece->width);
 			state->rotation = 0;
 			state->yOffset = 0;
 		}
 	}
 }
 
-u8 Game::getPlayerXOffset(const u8 playerIndex, const u8 pieceWidth) {
+u8 Game::getPlayerStartingXOffset(const u8 playerIndex, const u8 pieceWidth) {
 	return static_cast<u8>((((m_gameWidth * (playerIndex * 2 + 1)) / m_numPlayers) >> 1)) - static_cast<u8>((pieceWidth >> 1));
 }
 
@@ -402,11 +402,11 @@ void Game::renderGame() {
 		u8 ghostPieceOffset = getBottom(playerIndex);
 		m_pieceState->renderPiece(m_renderer, state->piece, state->rotation, state->xOffset, state->yOffset, &m_playerColors[playerIndex], PieceToDraw::GhostPiece, ghostPieceOffset);
 
-		m_pieceState->renderPiece(m_renderer, state->nextPiece, 0, getPlayerXOffset(playerIndex, state->nextPiece->width), 
+		m_pieceState->renderPiece(m_renderer, state->nextPiece, 0, getPlayerStartingXOffset(playerIndex, state->nextPiece->width), 
 			-verticalBuffer + 1 - (state->nextPiece->width / 4), &m_playerColors[playerIndex], PieceToDraw::NextPiece);
 
 		if (state->heldPiece != nullptr) {
-			m_pieceState->renderPiece(m_renderer, state->heldPiece, 0, getPlayerXOffset(playerIndex, state->heldPiece->width), 
+			m_pieceState->renderPiece(m_renderer, state->heldPiece, 0, getPlayerStartingXOffset(playerIndex, state->heldPiece->width), 
 				m_gameHeight + 2, &m_playerColors[playerIndex], PieceToDraw::HeldPiece);
 		}
 
