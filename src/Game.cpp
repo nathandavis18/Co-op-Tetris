@@ -57,6 +57,9 @@ void Game::loop() {
 			if (m_playerTimes[playerIndex].asMilliseconds() <= 0) {
 				if (hasCollided(playerIndex)) {
 					updateBoard(playerIndex);
+
+					if(m_numPlayers > 1) movePlayerPieces(playerIndex);
+
 					clearLines();
 					m_quit = hasLost();
 					updateLevel();
@@ -194,6 +197,28 @@ bool Game::hasCollided(const u8 playerIndex) {
 		}
 	}
 	return false;
+}
+
+void Game::movePlayerPieces(const u8 currentPlayerIndex) {
+	for (u8 playerIndex = 0; playerIndex < m_numPlayers; ++playerIndex) {
+		if (playerIndex == currentPlayerIndex) continue;
+
+		std::unique_ptr<State>& state = m_playerStates[playerIndex];
+
+		for (u8 x = 0; x < state->piece->width; ++x) {
+			for (u8 y = 0; y < state->piece->width; ++y) {
+				while (m_pieceState->getPieceData(x, y, state->piece, state->rotation) && m_board->getBoardPosition(x + state->xOffset, y + state->yOffset))
+				{
+					if (state->yOffset - 1 <= 0) {
+						m_quit = true;
+						return;
+					}
+
+					--state->yOffset;
+				}
+			}
+		}
+	}
 }
 
 /// <summary>

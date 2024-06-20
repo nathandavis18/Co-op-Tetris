@@ -33,6 +33,7 @@ private: //Private functions - Only the game class should be calling these
 	void clearLines();
 
 	bool hasCollided(const u8 playerIndex);
+	void movePlayerPieces(const u8 playerIndex);
 	bool hasLost();
 
 	bool canWallKick(const u8 rotation, const u8 playerIndex);
