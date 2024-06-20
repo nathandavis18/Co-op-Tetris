@@ -12,7 +12,7 @@
 /// </summary>
 class Renderer{
 public:
-	const Renderer(const u8 pieceSize, sf::RenderWindow* const window);
+	Renderer(const u8 pieceSize, sf::RenderWindow* const window);
 	void clearRenderer();
 	void showRenderer();
 	void drawBorder(const u8 gameWidth, const u8 gameHeight);
