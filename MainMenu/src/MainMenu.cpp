@@ -1,6 +1,7 @@
 #include "../Headers/MainMenu.hpp"
 
 MainMenu::MainMenu() : m_numPlayers(1), window(sf::VideoMode(mainMenuWindowWidth, mainMenuWindowHeight), "TETRIS"), m_eventHandler(&window) {
+	window.setPosition(sf::Vector2i(sf::VideoMode::getDesktopMode().width / 2 - mainMenuWindowWidth / 2, sf::VideoMode::getDesktopMode().height / 2 - mainMenuWindowHeight / 2));
 	window.clear();
 	window.display();
 	showMainMenu();
@@ -34,6 +35,7 @@ void MainMenu::startGame() {
 	calculateGameSizes();
 	window.close();
 	sf::RenderWindow gameWindow = sf::RenderWindow(sf::VideoMode(gameWindowWidth, gameWindowHeight), "TETRIS");
+	gameWindow.setPosition(sf::Vector2i(sf::VideoMode::getDesktopMode().width / 2 - gameWindowWidth / 2, sf::VideoMode::getDesktopMode().height / 2 - gameWindowHeight / 2));
 	Renderer mainRenderer = Renderer(pieceSize, &gameWindow);
 	Board mainBoard = Board(gameWidth, boardHeight);
 	InputController mainInputController = InputController(&gameWindow);

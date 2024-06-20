@@ -36,4 +36,5 @@ uint8_t MainMenuEventHandler::handleInput() {
 			return 0;
 		}
 	}
+	return 0;
 }
