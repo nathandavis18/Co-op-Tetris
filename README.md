@@ -77,19 +77,42 @@ CMake is the build system for this project. You will need CMake Version 3.16 or 
 
 To build this project, run
 
-    cmake -B {buildDirectory} -S {pathToSource} -DCMAKE_BUILD_TYPE:STRING="Release"
-    cmake --build {buildDirectory}
+    cmake -B {buildDirectory} -S {pathToSource} -DCMAKE_BUILD_TYPE=Release
+    cmake --build {buildDirectory} --config Release
 
 If you are in the source directory (the folder that contains the CMakeLists.txt file), then you can just run
 
-    cmake -B {buildDirectory} -DCMAKE_BUILD_TYPE:STRING="Release"
-    cmake --build {buildDirectory}
+    cmake -B {buildDirectory} -DCMAKE_BUILD_TYPE=Release
+    cmake --build {buildDirectory} --config Release
 
 An example of building (while in the source directory) would be:
 
-    cmake -B "./out/build" -DCMAKE_BUILD_TYPE:STRING="Release"
-    cmake --build "./out/build"
+    cmake -B "./out/build" -DCMAKE_BUILD_TYPE=Release
+    cmake --build "./out/build" --config Release
 
-After building the project, you will find the executable in the /bin or /bin/Debug folder of the {buildDirectory} specified above.
+After building the project, you will find the executable in the /bin or /bin/Release folder of the {buildDirectory} specified above.
 
-This has only been tested on Windows, using both Ninja for Visual Studio and the Visual Studio 17 2022 build generators and the MSVC C++ compiler. Untested on Linux and Mac and other C++ compilers. 
+You must run the game from the directory containing the executable so that it knows the path containing the controls.txt and default-controls.txt files.
+
+### Linux Users
+
+If you are on Linux, you will need to install certain packages to be built from source with your package manager. 
+
+If you are on a Debian-based distro, you can use the following commands:
+
+    sudo apt update
+
+    sudo apt install \
+        libxrandr-dev \
+        libxcursor-dev \
+        libudev-dev \
+        libfreetype-dev \
+        libopenal-dev \
+        libflac-dev \
+        libvorbis-dev \
+        libgl1-mesa-dev \
+        libegl1-mesa-dev
+
+If you are on another distro, such as Fedora, you will need to use your package manager to install these packages.
+
+This project has been built and tested on Windows using the MSVC C++ compiler with both the Ninja and Visual Studio build generators, as well as on Ubuntu (on WSL) with the g++ compiler and the Ninja build generator.
