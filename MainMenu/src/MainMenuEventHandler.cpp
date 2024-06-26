@@ -3,16 +3,20 @@
 
 MainMenuEventHandler::MainMenuEventHandler(sf::Window* const window) : m_window(window), m_event(sf::Event()) {}
 
-uint8_t MainMenuEventHandler::handleInput() {
+uint8_t MainMenuEventHandler::handleInput()
+{
 	MainMenuAction mma = MainMenuAction::None;
-	while (m_window->pollEvent(m_event)) {
-		switch (m_event.type) {
+	while (m_window->pollEvent(m_event))
+	{
+		switch (m_event.type)
+		{
 		case sf::Event::Closed:
 			m_window->close();
 			break;
 
 		case sf::Event::EventType::KeyPressed:
-			switch (m_event.key.code) {
+			switch (m_event.key.code)
+			{
 			case sf::Keyboard::Num1:
 				return 1;
 			case sf::Keyboard::Numpad1:

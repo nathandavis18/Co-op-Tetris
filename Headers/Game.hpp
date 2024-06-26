@@ -17,10 +17,11 @@ using Piece = PieceState::Piece;
 /// The Game Engine class.
 /// Controls all events of the game, handing information off to/requesting information from other classes as needed
 /// </summary>
-class Game{
+class Game
+{
 public:
-	Game(const u8 numPlayers, const u8 gameWidth, const u8 gameHeight, const u16 boardXOffset, const u16 boardYOffset, const u16 windowWidth, const u16 windowHeight, 
-			sf::RenderWindow* const, Renderer* const, Board* const, InputController* const, MusicController* const, PieceState* const, Blocks* const);
+	Game(const u8 numPlayers, const u8 gameWidth, const u8 gameHeight, const u16 boardXOffset, const u16 boardYOffset, const u16 windowWidth, const u16 windowHeight,
+		sf::RenderWindow* const, Renderer* const, Board* const, InputController* const, MusicController* const, PieceState* const, Blocks* const);
 private: //Private functions - Only the game class should be calling these
 	void loop();
 
@@ -76,7 +77,7 @@ private: //Private variables
 	Board* const m_board;
 	PieceState* const m_pieceState;
 	Blocks* const m_blockGenerator;
-	
+
 	std::vector<std::unique_ptr<State>> m_playerStates;
 
 	std::vector<sf::Time> m_playerTimes;

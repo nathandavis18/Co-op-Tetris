@@ -7,18 +7,21 @@
 /// <summary>
 /// This class abstracts the sf::Event input handler away from the Game class
 /// </summary>
-class InputController {
+class InputController
+{
 public:
 	InputController(sf::Window* const);
 	PlayerMove input(const bool = false);
 private:
-	struct PlayerKeyboardControls {
+	struct PlayerKeyboardControls
+	{
 		PlayerKeyboardControls(const u8 playerIndex, const u8 input, const u8 moveToMake);
 		u8 playerIndex;
 		u8 keyboardInput;
 		u8 moveToMake;
 	};
-	struct PlayerJoystickControls {
+	struct PlayerJoystickControls
+	{
 		PlayerJoystickControls(const u8 playerIndex, const u8 input, const u8 moveToMake);
 		u8 playerIndex;
 		u8 controllerInput;

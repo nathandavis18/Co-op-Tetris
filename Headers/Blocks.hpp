@@ -8,7 +8,8 @@
 /// <summary>
 /// This class abstracts the tetris block data away from the Game class
 /// </summary>
-class Blocks {
+class Blocks
+{
 public:
 	Blocks();
 	const PieceState::Piece& getBlock();

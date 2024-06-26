@@ -13,10 +13,11 @@ using s8 = std::int8_t;
 * Also defines the typedefs above.
 */
 enum Move { Right = 0, Left = 1, Down = 2, Rotate = 3, HardDrop = 4, HoldPiece = 5, PlayAgain = 6, None };
-enum class PieceToDraw { NormalPiece, GhostPiece, HeldPiece, NextPiece};
+enum class PieceToDraw { NormalPiece, GhostPiece, HeldPiece, NextPiece };
 
 
-struct PlayerMove {
+struct PlayerMove
+{
 	Move move;
 	u8 player;
 };
@@ -26,7 +27,8 @@ static const sf::Color BluePlayerGhostFill = sf::Color(0, 0, 150, 100);
 static const sf::Color YellowPlayerGhostFill = sf::Color(150, 150, 0, 100);
 static const sf::Color MagentaPlayerGhostFill = sf::Color(100, 0, 50, 100);
 
-struct PlayerColor {
+struct PlayerColor
+{
 	sf::Color fillColor;
 	sf::Color ghostFillColor;
 };

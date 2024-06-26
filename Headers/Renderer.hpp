@@ -10,7 +10,8 @@
 /// <summary>
 /// This class abstracts the rendering information away from the Game class
 /// </summary>
-class Renderer{
+class Renderer
+{
 public:
 	Renderer(const u8 pieceSize, sf::RenderWindow* const window);
 	void clearRenderer();

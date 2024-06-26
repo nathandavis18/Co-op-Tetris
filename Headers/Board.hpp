@@ -4,7 +4,8 @@
 #include "Globals.hpp"
 #include "Renderer.hpp"
 
-class Board {
+class Board
+{
 public:
 	Board(const u8 width, const u8 height);
 	void resetBoard();

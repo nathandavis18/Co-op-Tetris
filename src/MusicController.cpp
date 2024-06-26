@@ -4,11 +4,14 @@
 /// Initalizes the theme song file. If it can't be opened, don't allow the music to be played.
 /// Also turns down the volume so it isn't too loud.
 /// </summary>
-MusicController::MusicController() : musicAvailable(true) {
-	if (!m_theme.openFromFile("./Tetris-Theme.ogg")) {
+MusicController::MusicController() : musicAvailable(true)
+{
+	if (!m_theme.openFromFile("./Tetris-Theme.ogg"))
+	{
 		musicAvailable = false;
 	}
-	else {
+	else
+	{
 		m_theme.setVolume(40);
 	}
 }
@@ -16,7 +19,8 @@ MusicController::MusicController() : musicAvailable(true) {
 /// <summary>
 /// Starts the music and sets the loop.
 /// </summary>
-void MusicController::startMusic() {
+void MusicController::startMusic()
+{
 	if (!musicAvailable) return;
 
 	m_theme.play();
@@ -26,7 +30,8 @@ void MusicController::startMusic() {
 /// <summary>
 /// Stops the music after losing.
 /// </summary>
-void MusicController::stopMusic() {
+void MusicController::stopMusic()
+{
 	if (!musicAvailable) return;
 
 	m_theme.stop();

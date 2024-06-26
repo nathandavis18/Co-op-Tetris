@@ -2,9 +2,10 @@
 #include <SFML/Window/Event.hpp>
 #include <SFML/Window/Window.hpp>
 
-enum class MainMenuAction{ChangeNumPlayers, ChangeControl, StartGame, None};
+enum class MainMenuAction { ChangeNumPlayers, ChangeControl, StartGame, None };
 
-class MainMenuEventHandler {
+class MainMenuEventHandler
+{
 public:
 	MainMenuEventHandler(sf::Window* const);
 	uint8_t handleInput();

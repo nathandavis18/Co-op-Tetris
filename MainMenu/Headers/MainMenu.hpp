@@ -7,7 +7,8 @@
 #include "../../Headers/Game.hpp"
 #include "MainMenuEventHandler.hpp"
 
-class MainMenu {
+class MainMenu
+{
 public:
 	MainMenu();
 	void showMainMenu();
