@@ -280,62 +280,178 @@ bool Game::hasLost()
 }
 
 /// <summary>
-/// Checks if when the player rotates the piece can be pushed or not by checking collision above and to the sides of it.
+/// Run through a set of 5 tests depending on rotation (pulled from tetris wiki https://tetris.wiki/Super_Rotation_System
 /// </summary>
-/// <param name="rotation">The rotation to check</param>
-/// <param name="playerIndex">The player's piece to check</param>
-/// <returns></returns>
-bool Game::canWallKick(const u8 rotation, const u8 playerIndex)
+/// <param name="playerIndex">The index of the player making the rotation</param>
+void Game::tryRotate(const u8 playerIndex)
 {
-	std::unique_ptr<State>& state = m_playerStates[playerIndex];
+	const std::unique_ptr<State>& state = m_playerStates[playerIndex];
+	const u8 nextRotation = (state->rotation + 1) % 4;
+
+	s8 xMovement = 0, yMovement = 0;
+
+check1:
 	for (u8 x = 0; x < state->piece->width; ++x)
 	{
 		for (u8 y = 0; y < state->piece->width; ++y)
 		{
-			if (m_pieceState->getPieceData(x, y, state->piece, rotation))
+			if (m_pieceState->getPieceData(x, y, state->piece, nextRotation))
 			{
 				s8 bX = state->xOffset + x;
-				u8 bY = state->yOffset + y;
+				s8 bY = state->yOffset + y;
 				if (m_board->getBoardPosition(bX, bY))
 				{
-					return false;
+					goto check2;
 				}
 			}
 		}
 	}
-	return true;
+	goto rotate;
+	
+
+check2:
+	if(nextRotation == 0 || nextRotation == 1)
+	{
+		xMovement = -1;
+		yMovement = 0;
+	}
+	else
+	{
+		xMovement = 1;
+		yMovement = 0;
+	}
+
+	for (u8 x = 0; x < state->piece->width; ++x)
+	{
+		for (u8 y = 0; y < state->piece->width; ++y)
+		{
+			if (m_pieceState->getPieceData(x, y, state->piece, nextRotation))
+			{
+				s8 bX = state->xOffset + x + xMovement;
+				s8 bY = state->yOffset + y + yMovement;
+				if (m_board->getBoardPosition(bX, bY))
+				{
+					goto check3;
+				}
+			}
+		}
+	}
+	goto rotate;
+check3:
+	if (nextRotation == 1)
+	{
+		xMovement = -1;
+		yMovement = -1;
+	}
+	else if (nextRotation == 2)
+	{
+		xMovement = 1;
+		yMovement = 1;
+	}
+	else if (nextRotation == 3)
+	{
+		xMovement = 1;
+		yMovement = -1;
+	}
+	else
+	{
+		xMovement = -1;
+		yMovement = 1;
+	}
+	for (u8 x = 0; x < state->piece->width; ++x)
+	{
+		for (u8 y = 0; y < state->piece->width; ++y)
+		{
+			if (m_pieceState->getPieceData(x, y, state->piece, nextRotation))
+			{
+				s8 bX = state->xOffset + x + xMovement;
+				s8 bY = state->yOffset + y + yMovement;
+				if (m_board->getBoardPosition(bX, bY))
+				{
+					goto check4;
+				}
+			}
+		}
+	}
+	goto rotate;
+check4:
+	if (nextRotation == 1 || nextRotation == 3)
+	{
+		xMovement = 0;
+		yMovement = 2;
+	}
+	else
+	{
+		xMovement = 0;
+		yMovement = -2;
+	}
+	for (u8 x = 0; x < state->piece->width; ++x)
+	{
+		for (u8 y = 0; y < state->piece->width; ++y)
+		{
+			if (m_pieceState->getPieceData(x, y, state->piece, nextRotation))
+			{
+				s8 bX = state->xOffset + x + xMovement;
+				s8 bY = state->yOffset + y + yMovement;
+				if (m_board->getBoardPosition(bX, bY))
+				{
+					goto check5;
+				}
+			}
+		}
+	}
+	goto rotate;
+check5:
+	if (nextRotation == 1)
+	{
+		xMovement = -1;
+		yMovement = 2;
+	}
+	else if (nextRotation == 2)
+	{
+		xMovement = 1;
+		yMovement = -2;
+	}
+	else if (nextRotation == 3)
+	{
+		xMovement = 1;
+		yMovement = 2;
+	}
+	else
+	{
+		xMovement = -1;
+		yMovement = -2;
+	}
+	for (u8 x = 0; x < state->piece->width; ++x)
+	{
+		for (u8 y = 0; y < state->piece->width; ++y)
+		{
+			if (m_pieceState->getPieceData(x, y, state->piece, nextRotation))
+			{
+				s8 bX = state->xOffset + x + xMovement;
+				s8 bY = state->yOffset + y + yMovement;
+				if (m_board->getBoardPosition(bX, bY))
+				{
+					return;
+				}
+			}
+		}
+	}
+rotate:
+	rotatePiece(playerIndex, xMovement, yMovement);
+	return;
 }
 
 /// <summary>
 /// Pushes the piece away from the wall if it can.
 /// </summary>
 /// <param name="playerIndex">The current player's piece</param>
-void Game::wallKick(const u8 playerIndex)
+void Game::rotatePiece(const u8 playerIndex, const u8 x, const u8 y)
 {
 	std::unique_ptr<State>& state = m_playerStates[playerIndex];
-	for (u8 x = 0; x < state->piece->width; ++x)
-	{
-		for (u8 y = 0; y < state->piece->width; ++y)
-		{
-			if (m_pieceState->getPieceData(x, y, state->piece, state->rotation))
-			{
-				s8 bX = state->xOffset + x;
-				u8 bY = state->yOffset + y;
-				if (bX < 0)
-				{
-					state->xOffset -= bX;
-				}
-				if (bX >= m_gameWidth)
-				{
-					state->xOffset -= (bX - m_gameWidth) + 1;
-				}
-				if (bY >= m_gameHeight)
-				{
-					--state->yOffset;
-				}
-			}
-		}
-	}
+	state->rotation = (state->rotation + 1) % 4;
+	state->xOffset += x;
+	state->yOffset += y;
 }
 
 /// <summary>
@@ -394,11 +510,7 @@ void Game::input()
 		break;
 
 	case Move::Rotate:
-		if (canWallKick((m_playerStates[pm.player]->rotation + 1) % 4, pm.player))
-		{
-			m_playerStates[pm.player]->rotation = (m_playerStates[pm.player]->rotation + 1) % 4;
-			wallKick(pm.player);
-		}
+		tryRotate(pm.player);
 		break;
 
 	case Move::HardDrop:
