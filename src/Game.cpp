@@ -13,7 +13,7 @@ Game::Game(const u8 numPlayers, const u8 gameWidth, const u8 gameHeight, const u
 	MusicController* const musicController, PieceState* const pieceState, Blocks* const blocks) :
 	m_numPlayers(numPlayers), m_timeToNextDrop(m_framesPerDrop[m_level] / m_framesPerSecond),
 	m_gameWidth(gameWidth), m_gameHeight(gameHeight), m_boardXOffset(boardXOffset), m_boardYOffset(boardYOffset), m_totalWidth(windowWidth), m_totalHeight(windowHeight),
-	m_board(board), m_window(window), m_renderer(renderer), m_inputController(inputController), m_musicController(musicController), m_pieceState(pieceState), m_blockGenerator(blocks)
+	m_board(board), m_renderer(renderer), m_inputController(inputController), m_musicController(musicController), m_pieceState(pieceState), m_blockGenerator(blocks)
 {
 	for (u8 playerIndex = 0; playerIndex < numPlayers; ++playerIndex)
 	{
@@ -55,7 +55,7 @@ Game::Game(const u8 numPlayers, const u8 gameWidth, const u8 gameHeight, const u
 /// </summary>
 void Game::loop()
 {
-	while (!m_quit && m_window->isOpen())
+	while (!m_quit && m_renderer->isWindowOpen())
 	{
 		input();
 		renderGame();
@@ -87,7 +87,7 @@ void Game::loop()
 			}
 		}
 	}
-	while (m_quit && m_window->isOpen())
+	while (m_quit && m_renderer->isWindowOpen())
 	{
 		m_renderer->clearRenderer();
 		input();
@@ -109,9 +109,10 @@ void Game::newPiece(const u8 playerIndex)
 	state->piece = std::move(state->nextPiece);
 	state->nextPiece = std::make_unique<Piece>(m_blockGenerator->getBlock());
 
+	constexpr bool startingRotation = 0;
 	state->xOffset = getPlayerStartingXOffset(playerIndex, state->piece->width);
 	state->yOffset = 0;
-	state->rotation = 0;
+	state->rotation = startingRotation;
 	state->canHoldPiece = true;
 }
 
@@ -188,7 +189,8 @@ void Game::clearLines()
 		{
 			for (u8 x = 0; x < m_gameWidth; ++x)
 			{
-				m_board->setBoardPosition(x, y, 0); //If its a full row, we clear it
+				constexpr bool pieceCleared = 0;
+				m_board->setBoardPosition(x, y, pieceCleared); //If its a full row, we clear it
 			}
 			++m_clearedLines;
 			m_yClearLevel = y;
@@ -196,7 +198,7 @@ void Game::clearLines()
 	}
 	m_lines += m_clearedLines; //Updating total amount of lines cleared
 	while (m_clearedLines > 0)
-	{ //If we clear 1 line, we drop the rest of the m_board one time. Two times for 2 cleared lines, and so on
+	{
 		for (u8 y = m_yClearLevel; y > 0; --y)
 		{
 			for (u8 x = 0; x < m_gameWidth; ++x)
@@ -224,7 +226,7 @@ bool Game::hasCollided(const u8 playerIndex)
 			{
 				s8 bX = state->xOffset + x;
 				u8 bY = state->yOffset + y + 1; //Checking the spot below the piece
-				if (bY >= 0 && (m_board->getBoardPosition(bX, bY) || bY >= m_gameHeight))
+				if (m_board->getBoardPosition(bX, bY) || bY == m_gameHeight)
 				{
 					return true;
 				}
@@ -234,6 +236,10 @@ bool Game::hasCollided(const u8 playerIndex)
 	return false;
 }
 
+/// <summary>
+/// Moves player pieces that are attempting to occupy the same space as the current dropped piece
+/// </summary>
+/// <param name="currentPlayerIndex">The most recently dropped/collided piece</param>
 void Game::movePlayerPieces(const u8 currentPlayerIndex)
 {
 	for (u8 playerIndex = 0; playerIndex < m_numPlayers; ++playerIndex)
@@ -270,8 +276,9 @@ bool Game::hasLost()
 {
 	for (u8 x = 0; x < m_gameWidth; ++x)
 	{
-		if (m_board->getBoardPosition(x, 0))
-		{//If there is a piece on the top row, then we lose
+		constexpr bool topRow = 0;
+		if (m_board->getBoardPosition(x, topRow))
+		{
 			m_musicController->stopMusic();
 			return true;
 		}
@@ -279,6 +286,14 @@ bool Game::hasLost()
 	return false;
 }
 
+/// <summary>
+/// Checks the current piece state and checks if the attempted rotation will put the piece inside another piece or outside the board bounds
+/// </summary>
+/// <param name="state">Current piece state</param>
+/// <param name="nextRotation">The rotation to check</param>
+/// <param name="xMovement">How far left/right the piece is allowed to move, from the Tetris Wiki</param>
+/// <param name="yMovement">How far up/down the piece is allowed to move, from the Tetris Wiki</param>
+/// <returns></returns>
 bool Game::validRotateStatus(const std::unique_ptr<State>& state, const u8 nextRotation, const s8 xMovement, const s8 yMovement)
 {
 	for (u8 x = 0; x < state->piece->width; ++x)
@@ -308,13 +323,17 @@ void Game::tryRotate(const u8 playerIndex)
 
 	s8 xMovement = 0, yMovement = 0;
 
-	if (state->piece->width == 4)
+	constexpr u8 oPieceWidth = 2, iPieceWidth = 4;
+	if (state->piece->width == oPieceWidth) return; //O Piece cannot rotate
+
+	if (state->piece->width == iPieceWidth) //If I piece (has a unique rotation system)
 	{
 	    //Test 1 for I Piece
 		if (validRotateStatus(state, nextRotation, xMovement, yMovement))
 		{
 			goto rotate;
 		}
+		//End Test 1
 
 		//Test 2 for I Piece
 		if (nextRotation == 1)
@@ -341,6 +360,7 @@ void Game::tryRotate(const u8 playerIndex)
 		{
 			goto rotate;
 		}
+		//End Test 2
 
 		//Test 3 for I Piece
 		if (nextRotation == 1)
@@ -367,6 +387,7 @@ void Game::tryRotate(const u8 playerIndex)
 		{
 			goto rotate;
 		}
+		//End Test 3
 
 		//Test 4 for I Piece:
 		if (nextRotation == 1)
@@ -393,6 +414,7 @@ void Game::tryRotate(const u8 playerIndex)
 		{
 			goto rotate;
 		}
+		//End Test 4
 
 		//Test 5 for I Piece:
 		if (nextRotation == 1)
@@ -419,7 +441,8 @@ void Game::tryRotate(const u8 playerIndex)
 		{
 			goto rotate;
 		}
-		return; //If we made it here, there are no valid rotations available at current position
+		return;
+		//End Test 5
 	}
 	else [[likely]] {
 		//Test 1 for non-I Piece
@@ -427,6 +450,7 @@ void Game::tryRotate(const u8 playerIndex)
 		{
 			goto rotate;
 		}
+		//End Test 1
 
 		//Test 2 for non-I Piece
 		if (nextRotation == 0 || nextRotation == 1)
@@ -444,6 +468,7 @@ void Game::tryRotate(const u8 playerIndex)
 		{
 			goto rotate;
 		}
+		//End Test 2
 
 		//Test 3 for non-I Piece
 		if (nextRotation == 1)
@@ -470,6 +495,7 @@ void Game::tryRotate(const u8 playerIndex)
 		{
 			goto rotate;
 		}
+		//End Test 3
 		
 		//Test 4 for non-I Piece
 		if (nextRotation == 1 || nextRotation == 3)
@@ -486,6 +512,7 @@ void Game::tryRotate(const u8 playerIndex)
 		{
 			goto rotate;
 		}
+		//End Test 4
 		
 		//Test 5 for non-I Piece
 		if (nextRotation == 1)
@@ -513,6 +540,7 @@ void Game::tryRotate(const u8 playerIndex)
 			goto rotate;
 		}
 		return;
+		//End Test 5
 	}
 
 	rotate:
@@ -521,9 +549,11 @@ void Game::tryRotate(const u8 playerIndex)
 }
 
 /// <summary>
-/// Pushes the piece away from the wall if it can.
+/// Pushes the piece away from the wall/board.
 /// </summary>
 /// <param name="playerIndex">The current player's piece</param>
+/// <param name="x">How far left/right to move the piece after rotating</param>
+/// <param name="y">How far up/down to move the piece after rotating</param>
 void Game::rotatePiece(const u8 playerIndex, const u8 x, const u8 y)
 {
 	std::unique_ptr<State>& state = m_playerStates[playerIndex];
@@ -533,13 +563,13 @@ void Game::rotatePiece(const u8 playerIndex, const u8 x, const u8 y)
 }
 
 /// <summary>
-/// Checks if a given move is valid. Does not allow player to move outside the board, or into another piece on the board.
+/// Checks if a given directional move is valid. Does not allow player to move outside the board, or into another piece on the board.
 /// </summary>
 /// <param name="move">The move needing to be checked</param>
 /// <param name="playerIndex">The player making the move</param>
 /// <returns></returns>
 bool Game::isValidMove(const Move move, const u8 playerIndex)
-{ //Can't move into the m_board or another piece
+{ 
 	std::unique_ptr<State>& state = m_playerStates[playerIndex];
 	for (u8 x = 0; x < state->piece->width; ++x)
 	{
@@ -553,8 +583,6 @@ bool Game::isValidMove(const Move move, const u8 playerIndex)
 				if ((bX <= 0 || m_board->getBoardPosition(bX - 1, bY)) && move == Move::Left)
 					return false;
 				if ((bX >= m_gameWidth - 1 || m_board->getBoardPosition(bX + 1, bY)) && move == Move::Right)
-					return false;
-				if (bY >= m_gameHeight && move == Move::Down)
 					return false;
 			}
 		}
@@ -583,8 +611,7 @@ void Game::input()
 		break;
 
 	case Move::Down:
-		if (isValidMove(Move::Down, pm.player))
-			m_playerTimes[pm.player] = sf::milliseconds(0);
+		m_playerTimes[pm.player] = sf::milliseconds(0);
 		break;
 
 	case Move::Rotate:
@@ -614,7 +641,7 @@ void Game::input()
 /// </summary>
 /// <param name="playerIndex">The current player's piece</param>
 /// <returns>The amount that the piece can go down</returns>
-u8 Game::getBottom(const u8 playerIndex)
+const u8 Game::getBottom(const u8 playerIndex)
 {
 	u8 checkAmount;
 	u8 finalAmount = m_gameHeight;
@@ -644,7 +671,7 @@ u8 Game::getBottom(const u8 playerIndex)
 }
 
 /// <summary>
-/// Method used for hard dropping a piece
+/// Moves the current piece to the bottom of the board and forces a collision
 /// </summary>
 /// <param name="playerIndex">The player dropping the piece</param>
 void Game::dropPiece(const u8 playerIndex)
@@ -653,6 +680,11 @@ void Game::dropPiece(const u8 playerIndex)
 	m_playerTimes[playerIndex] = sf::milliseconds(0);
 }
 
+/// <summary>
+/// If a player can hold a piece (if the last piece they received wasn't held), holds the current piece.
+/// If the player already has a held piece, swaps the held and current piece. 
+/// </summary>
+/// <param name="playerIndex"></param>
 void Game::holdPiece(const u8 playerIndex)
 {
 	std::unique_ptr<State>& state = m_playerStates[playerIndex];
@@ -674,7 +706,13 @@ void Game::holdPiece(const u8 playerIndex)
 	}
 }
 
-u8 Game::getPlayerStartingXOffset(const u8 playerIndex, const u8 pieceWidth)
+/// <summary>
+/// An automated algorithm to determine each player's starting position based on current number of players
+/// </summary>
+/// <param name="playerIndex">The current player</param>
+/// <param name="pieceWidth">The current piece's width</param>
+/// <returns></returns>
+const u8 Game::getPlayerStartingXOffset(const u8 playerIndex, const u8 pieceWidth)
 {
 	return static_cast<u8>((((m_gameWidth * (playerIndex * 2 + 1)) / m_numPlayers) >> 1)) - static_cast<u8>((pieceWidth >> 1));
 }

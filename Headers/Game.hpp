@@ -37,16 +37,16 @@ private: //Private functions - Only the game class should be calling these
 	void movePlayerPieces(const u8 playerIndex);
 	bool hasLost();
 
-	bool validRotateStatus(const std::unique_ptr<State>&, const u8 nextRotation, const s8 xMovement, const s8 yMovement);
+	bool validRotateStatus(const std::unique_ptr<State>&, const u8 nextRotation, const s8 xMovement = 0, const s8 yMovement = 0);
 	void tryRotate(const u8 playerIndex);
 	void rotatePiece(const u8 playerIndex, const u8 x, const u8 y);
 
 	bool isValidMove(const Move move, const u8 playerIndex);
 	void input();
 	void dropPiece(const u8 playerIndex);
-	u8 getBottom(const u8 playerIndex);
+	const u8 getBottom(const u8 playerIndex);
 	void holdPiece(const u8 playerIndex);
-	u8 getPlayerStartingXOffset(const u8 playerIndex, const u8 pieceWidth);
+	const u8 getPlayerStartingXOffset(const u8 playerIndex, const u8 pieceWidth);
 
 
 	void renderGame();
@@ -71,7 +71,6 @@ private: //Private variables
 	};
 	double m_timeToNextDrop;
 
-	sf::RenderWindow* const m_window;
 	Renderer* const m_renderer;
 	MusicController* const m_musicController;
 	InputController* const m_inputController;

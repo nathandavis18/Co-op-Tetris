@@ -14,6 +14,7 @@ class Renderer
 {
 public:
 	Renderer(const u8 pieceSize, sf::RenderWindow* const window);
+	const bool isWindowOpen();
 	void clearRenderer();
 	void showRenderer();
 	void drawBorder(const u8 gameWidth, const u8 gameHeight);

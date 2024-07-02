@@ -10,6 +10,15 @@
 Renderer::Renderer(const u8 pieceSize, sf::RenderWindow* const window) : m_pieceSize(pieceSize), m_window(window) {}
 
 /// <summary>
+/// Returns the state of the window
+/// </summary>
+/// <returns></returns>
+const bool Renderer::isWindowOpen()
+{
+	return m_window->isOpen();
+}
+
+/// <summary>
 /// Clears the renderer
 /// </summary>
 void Renderer::clearRenderer()
