@@ -2,6 +2,7 @@
 #include <fstream>
 #include <SFML/Window.hpp>
 #include <SFML/Graphics/Image.hpp>
+#include <SFML/Graphics/Sprite.hpp>
 
 #include "../../Headers/Globals.hpp"
 #include "../../Headers/Game.hpp"
@@ -12,6 +13,7 @@ class MainMenu
 public:
 	MainMenu();
 	void showMainMenu();
+	void renderMainMenu();
 	void setNumPlayers(const u8 numPlayers);
 	void setPlayerControl(const u8 player, const u8 controllerType, const u8 input, const u8 moveToMake);
 	void calculateGameSizes();
@@ -36,4 +38,6 @@ private:
 	u16 gameWindowWidth, gameWindowHeight;
 
 	sf::Image bgImage;
+	sf::Texture bgTexture;
+	sf::Sprite bgSprite;
 };
