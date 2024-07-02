@@ -310,13 +310,13 @@ void Game::tryRotate(const u8 playerIndex)
 
 	if (state->piece->width == 4)
 	{
-	Icheck1:
-		if (!validRotateStatus(state, nextRotation, xMovement, yMovement))
+	    //Test 1 for I Piece
+		if (validRotateStatus(state, nextRotation, xMovement, yMovement))
 		{
-			goto Icheck2;
+			goto rotate;
 		}
-		goto rotate;
-	Icheck2:
+
+		//Test 2 for I Piece
 		if (nextRotation == 1)
 		{
 			xMovement = -2;
@@ -337,12 +337,12 @@ void Game::tryRotate(const u8 playerIndex)
 			xMovement = 1;
 			yMovement = 0;
 		}
-		if (!validRotateStatus(state, nextRotation, xMovement, yMovement))
+		if (validRotateStatus(state, nextRotation, xMovement, yMovement))
 		{
-			goto Icheck3;
+			goto rotate;
 		}
-		goto rotate;
-	Icheck3:
+
+		//Test 3 for I Piece
 		if (nextRotation == 1)
 		{
 			xMovement = 1;
@@ -363,12 +363,12 @@ void Game::tryRotate(const u8 playerIndex)
 			xMovement = -2;
 			yMovement = 0;
 		}
-		if (!validRotateStatus(state, nextRotation, xMovement, yMovement))
+		if (validRotateStatus(state, nextRotation, xMovement, yMovement))
 		{
-			goto Icheck4;
+			goto rotate;
 		}
-		goto rotate;
-	Icheck4:
+
+		//Test 4 for I Piece:
 		if (nextRotation == 1)
 		{
 			xMovement = -2;
@@ -389,12 +389,12 @@ void Game::tryRotate(const u8 playerIndex)
 			xMovement = 1;
 			yMovement = 2;
 		}
-		if (!validRotateStatus(state, nextRotation, xMovement, yMovement))
+		if (validRotateStatus(state, nextRotation, xMovement, yMovement))
 		{
-			goto Icheck5;
+			goto rotate;
 		}
-		goto rotate;
-	Icheck5:
+
+		//Test 5 for I Piece:
 		if (nextRotation == 1)
 		{
 			xMovement = 1;
@@ -415,22 +415,20 @@ void Game::tryRotate(const u8 playerIndex)
 			xMovement = -2;
 			yMovement = -1;
 		}
-		if (!validRotateStatus(state, nextRotation, xMovement, yMovement))
+		if (validRotateStatus(state, nextRotation, xMovement, yMovement))
 		{
-			return;
+			goto rotate;
 		}
-		goto rotate;
+		return; //If we made it here, there are no valid rotations available at current position
 	}
 	else [[likely]] {
-	check1:
-		if (!validRotateStatus(state, nextRotation, xMovement, yMovement))
+		//Test 1 for non-I Piece
+		if (validRotateStatus(state, nextRotation, xMovement, yMovement))
 		{
-			goto check2;
+			goto rotate;
 		}
-		goto rotate;
 
-
-	check2:
+		//Test 2 for non-I Piece
 		if (nextRotation == 0 || nextRotation == 1)
 		{
 			xMovement = -1;
@@ -442,12 +440,12 @@ void Game::tryRotate(const u8 playerIndex)
 			yMovement = 0;
 		}
 
-		if (!validRotateStatus(state, nextRotation, xMovement, yMovement))
+		if (validRotateStatus(state, nextRotation, xMovement, yMovement))
 		{
-			goto check3;
+			goto rotate;
 		}
-		goto rotate;
-	check3:
+
+		//Test 3 for non-I Piece
 		if (nextRotation == 1)
 		{
 			xMovement = -1;
@@ -468,12 +466,12 @@ void Game::tryRotate(const u8 playerIndex)
 			xMovement = -1;
 			yMovement = 1;
 		}
-		if (!validRotateStatus(state, nextRotation, xMovement, yMovement))
+		if (validRotateStatus(state, nextRotation, xMovement, yMovement))
 		{
-			goto check4;
+			goto rotate;
 		}
-		goto rotate;
-	check4:
+		
+		//Test 4 for non-I Piece
 		if (nextRotation == 1 || nextRotation == 3)
 		{
 			xMovement = 0;
@@ -484,12 +482,12 @@ void Game::tryRotate(const u8 playerIndex)
 			xMovement = 0;
 			yMovement = -2;
 		}
-		if (!validRotateStatus(state, nextRotation, xMovement, yMovement))
+		if (validRotateStatus(state, nextRotation, xMovement, yMovement))
 		{
-			goto check5;
+			goto rotate;
 		}
-		goto rotate;
-	check5:
+		
+		//Test 5 for non-I Piece
 		if (nextRotation == 1)
 		{
 			xMovement = -1;
@@ -510,14 +508,16 @@ void Game::tryRotate(const u8 playerIndex)
 			xMovement = -1;
 			yMovement = -2;
 		}
-		if (!validRotateStatus(state, nextRotation, xMovement, yMovement))
+		if (validRotateStatus(state, nextRotation, xMovement, yMovement))
 		{
-			return;
+			goto rotate;
 		}
+		return;
 	}
+
 	rotate:
-	rotatePiece(playerIndex, xMovement, yMovement);
-	return;
+		rotatePiece(playerIndex, xMovement, yMovement);
+		return;
 }
 
 /// <summary>
