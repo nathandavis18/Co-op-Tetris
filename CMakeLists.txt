@@ -36,7 +36,7 @@ set(HEADERS Headers/Blocks.hpp
 
 add_executable (Tetris ${SOURCES} ${HEADERS})
 target_link_libraries(Tetris PRIVATE sfml-graphics sfml-audio)
-target_compile_features(Tetris PRIVATE cxx_std_17)
+target_compile_features(Tetris PRIVATE cxx_std_20)
 
 if(WIN32)
     add_custom_command(
