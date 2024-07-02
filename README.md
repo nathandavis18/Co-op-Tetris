@@ -73,7 +73,7 @@ The game board size scales with the number of players. One player has a normal s
     Y -> Hold Piece
 
 ## Building
-CMake is the build system for this project. You will need CMake Version 3.16 or later to build.
+CMake is the build system for this project. You will need CMake Version 3.16 and a compiler with C++20 or later to build.
 
 To build this project, run
 
