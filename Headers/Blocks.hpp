@@ -44,10 +44,10 @@ private:
 		0, 0, 0
 	};
 	const std::vector<u8> iBlock = {
-		0, 0, 1, 0,
-		0, 0, 1, 0,
-		0, 0, 1, 0,
-		0, 0, 1, 0
+		0, 0, 0, 0,
+		1, 1, 1, 1,
+		0, 0, 0, 0,
+		0, 0, 0, 0
 	};
 	const std::vector<PieceState::Piece> m_blocks = {
 		PieceState::Piece(oBlock, 2),

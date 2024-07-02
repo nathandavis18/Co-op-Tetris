@@ -279,6 +279,24 @@ bool Game::hasLost()
 	return false;
 }
 
+bool Game::validRotateStatus(const std::unique_ptr<State>& state, const u8 nextRotation, const s8 xMovement, const s8 yMovement)
+{
+	for (u8 x = 0; x < state->piece->width; ++x)
+	{
+		for (u8 y = 0; y < state->piece->width; ++y)
+		{
+			if (m_pieceState->getPieceData(x, y, state->piece, nextRotation))
+			{
+				s8 bX = state->xOffset + x + xMovement;
+				s8 bY = state->yOffset + y + yMovement;
+				if(m_board->getBoardPosition(bX, bY) || bX < 0 || bX >= m_gameWidth || bY >= m_gameHeight) return false;
+			}
+			
+		}
+	}
+	return true;
+}
+
 /// <summary>
 /// Run through a set of 5 tests depending on rotation (pulled from tetris wiki https://tetris.wiki/Super_Rotation_System
 /// </summary>
@@ -290,154 +308,214 @@ void Game::tryRotate(const u8 playerIndex)
 
 	s8 xMovement = 0, yMovement = 0;
 
-check1:
-	for (u8 x = 0; x < state->piece->width; ++x)
+	if (state->piece->width == 4)
 	{
-		for (u8 y = 0; y < state->piece->width; ++y)
+	Icheck1:
+		if (!validRotateStatus(state, nextRotation, xMovement, yMovement))
 		{
-			if (m_pieceState->getPieceData(x, y, state->piece, nextRotation))
-			{
-				s8 bX = state->xOffset + x;
-				s8 bY = state->yOffset + y;
-				if (m_board->getBoardPosition(bX, bY))
-				{
-					goto check2;
-				}
-			}
+			goto Icheck2;
 		}
+		goto rotate;
+	Icheck2:
+		if (nextRotation == 1)
+		{
+			xMovement = -2;
+			yMovement = 0;
+		}
+		else if (nextRotation == 2)
+		{
+			xMovement = -1;
+			yMovement = 0;
+		}
+		else if (nextRotation == 3)
+		{
+			xMovement = 2;
+			yMovement = 0;
+		}
+		else
+		{
+			xMovement = 1;
+			yMovement = 0;
+		}
+		if (!validRotateStatus(state, nextRotation, xMovement, yMovement))
+		{
+			goto Icheck3;
+		}
+		goto rotate;
+	Icheck3:
+		if (nextRotation == 1)
+		{
+			xMovement = 1;
+			yMovement = 0;
+		}
+		else if (nextRotation == 2)
+		{
+			xMovement = 2;
+			yMovement = 0;
+		}
+		else if (nextRotation == 3)
+		{
+			xMovement = -1;
+			yMovement = 0;
+		}
+		else
+		{
+			xMovement = -2;
+			yMovement = 0;
+		}
+		if (!validRotateStatus(state, nextRotation, xMovement, yMovement))
+		{
+			goto Icheck4;
+		}
+		goto rotate;
+	Icheck4:
+		if (nextRotation == 1)
+		{
+			xMovement = -2;
+			yMovement = 1;
+		}
+		else if (nextRotation == 2)
+		{
+			xMovement = -1;
+			yMovement = -2;
+		}
+		else if (nextRotation == 3)
+		{
+			xMovement = 2;
+			yMovement = -1;
+		}
+		else
+		{
+			xMovement = 1;
+			yMovement = 2;
+		}
+		if (!validRotateStatus(state, nextRotation, xMovement, yMovement))
+		{
+			goto Icheck5;
+		}
+		goto rotate;
+	Icheck5:
+		if (nextRotation == 1)
+		{
+			xMovement = 1;
+			yMovement = -2;
+		}
+		else if (nextRotation == 2)
+		{
+			xMovement = 2;
+			yMovement = 1;
+		}
+		else if (nextRotation == 3)
+		{
+			xMovement = -1;
+			yMovement = 2;
+		}
+		else
+		{
+			xMovement = -2;
+			yMovement = -1;
+		}
+		if (!validRotateStatus(state, nextRotation, xMovement, yMovement))
+		{
+			return;
+		}
+		goto rotate;
 	}
-	goto rotate;
-	
+	else [[likely]] {
+	check1:
+		if (!validRotateStatus(state, nextRotation, xMovement, yMovement))
+		{
+			goto check2;
+		}
+		goto rotate;
 
-check2:
-	if(nextRotation == 0 || nextRotation == 1)
-	{
-		xMovement = -1;
-		yMovement = 0;
-	}
-	else
-	{
-		xMovement = 1;
-		yMovement = 0;
-	}
 
-	for (u8 x = 0; x < state->piece->width; ++x)
-	{
-		for (u8 y = 0; y < state->piece->width; ++y)
+	check2:
+		if (nextRotation == 0 || nextRotation == 1)
 		{
-			if (m_pieceState->getPieceData(x, y, state->piece, nextRotation))
-			{
-				s8 bX = state->xOffset + x + xMovement;
-				s8 bY = state->yOffset + y + yMovement;
-				if (m_board->getBoardPosition(bX, bY))
-				{
-					goto check3;
-				}
-			}
+			xMovement = -1;
+			yMovement = 0;
+		}
+		else
+		{
+			xMovement = 1;
+			yMovement = 0;
+		}
+
+		if (!validRotateStatus(state, nextRotation, xMovement, yMovement))
+		{
+			goto check3;
+		}
+		goto rotate;
+	check3:
+		if (nextRotation == 1)
+		{
+			xMovement = -1;
+			yMovement = -1;
+		}
+		else if (nextRotation == 2)
+		{
+			xMovement = 1;
+			yMovement = 1;
+		}
+		else if (nextRotation == 3)
+		{
+			xMovement = 1;
+			yMovement = -1;
+		}
+		else
+		{
+			xMovement = -1;
+			yMovement = 1;
+		}
+		if (!validRotateStatus(state, nextRotation, xMovement, yMovement))
+		{
+			goto check4;
+		}
+		goto rotate;
+	check4:
+		if (nextRotation == 1 || nextRotation == 3)
+		{
+			xMovement = 0;
+			yMovement = 2;
+		}
+		else
+		{
+			xMovement = 0;
+			yMovement = -2;
+		}
+		if (!validRotateStatus(state, nextRotation, xMovement, yMovement))
+		{
+			goto check5;
+		}
+		goto rotate;
+	check5:
+		if (nextRotation == 1)
+		{
+			xMovement = -1;
+			yMovement = 2;
+		}
+		else if (nextRotation == 2)
+		{
+			xMovement = 1;
+			yMovement = -2;
+		}
+		else if (nextRotation == 3)
+		{
+			xMovement = 1;
+			yMovement = 2;
+		}
+		else
+		{
+			xMovement = -1;
+			yMovement = -2;
+		}
+		if (!validRotateStatus(state, nextRotation, xMovement, yMovement))
+		{
+			return;
 		}
 	}
-	goto rotate;
-check3:
-	if (nextRotation == 1)
-	{
-		xMovement = -1;
-		yMovement = -1;
-	}
-	else if (nextRotation == 2)
-	{
-		xMovement = 1;
-		yMovement = 1;
-	}
-	else if (nextRotation == 3)
-	{
-		xMovement = 1;
-		yMovement = -1;
-	}
-	else
-	{
-		xMovement = -1;
-		yMovement = 1;
-	}
-	for (u8 x = 0; x < state->piece->width; ++x)
-	{
-		for (u8 y = 0; y < state->piece->width; ++y)
-		{
-			if (m_pieceState->getPieceData(x, y, state->piece, nextRotation))
-			{
-				s8 bX = state->xOffset + x + xMovement;
-				s8 bY = state->yOffset + y + yMovement;
-				if (m_board->getBoardPosition(bX, bY))
-				{
-					goto check4;
-				}
-			}
-		}
-	}
-	goto rotate;
-check4:
-	if (nextRotation == 1 || nextRotation == 3)
-	{
-		xMovement = 0;
-		yMovement = 2;
-	}
-	else
-	{
-		xMovement = 0;
-		yMovement = -2;
-	}
-	for (u8 x = 0; x < state->piece->width; ++x)
-	{
-		for (u8 y = 0; y < state->piece->width; ++y)
-		{
-			if (m_pieceState->getPieceData(x, y, state->piece, nextRotation))
-			{
-				s8 bX = state->xOffset + x + xMovement;
-				s8 bY = state->yOffset + y + yMovement;
-				if (m_board->getBoardPosition(bX, bY))
-				{
-					goto check5;
-				}
-			}
-		}
-	}
-	goto rotate;
-check5:
-	if (nextRotation == 1)
-	{
-		xMovement = -1;
-		yMovement = 2;
-	}
-	else if (nextRotation == 2)
-	{
-		xMovement = 1;
-		yMovement = -2;
-	}
-	else if (nextRotation == 3)
-	{
-		xMovement = 1;
-		yMovement = 2;
-	}
-	else
-	{
-		xMovement = -1;
-		yMovement = -2;
-	}
-	for (u8 x = 0; x < state->piece->width; ++x)
-	{
-		for (u8 y = 0; y < state->piece->width; ++y)
-		{
-			if (m_pieceState->getPieceData(x, y, state->piece, nextRotation))
-			{
-				s8 bX = state->xOffset + x + xMovement;
-				s8 bY = state->yOffset + y + yMovement;
-				if (m_board->getBoardPosition(bX, bY))
-				{
-					return;
-				}
-			}
-		}
-	}
-rotate:
+	rotate:
 	rotatePiece(playerIndex, xMovement, yMovement);
 	return;
 }

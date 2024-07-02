@@ -37,6 +37,7 @@ private: //Private functions - Only the game class should be calling these
 	void movePlayerPieces(const u8 playerIndex);
 	bool hasLost();
 
+	bool validRotateStatus(const std::unique_ptr<State>&, const u8 nextRotation, const s8 xMovement, const s8 yMovement);
 	void tryRotate(const u8 playerIndex);
 	void rotatePiece(const u8 playerIndex, const u8 x, const u8 y);
 
