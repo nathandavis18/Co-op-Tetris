@@ -69,5 +69,5 @@ void MainMenu::startGame()
 	MusicController mainMusicController;
 	PieceState mainPieceState;
 	Blocks mainBlockGenerator;
-	Game game(m_numPlayers, gameWidth, gameHeight, sideBuffer, verticalBuffer, gameWindowWidth, gameWindowHeight, &gameWindow, &mainRenderer, &mainBoard, &mainInputController, &mainMusicController, &mainPieceState, &mainBlockGenerator);
+	Game game(m_numPlayers, gameWidth, gameHeight, sideBuffer, verticalBuffer, gameWindowWidth, gameWindowHeight, &mainRenderer, &mainBoard, &mainInputController, &mainMusicController, &mainPieceState, &mainBlockGenerator);
 }

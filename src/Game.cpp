@@ -9,7 +9,7 @@
 /// Initializes the window, renderer, and input controller, and sets the game up.
 /// </summary>
 Game::Game(const u8 numPlayers, const u8 gameWidth, const u8 gameHeight, const u16 boardXOffset, const u16 boardYOffset, const u16 windowWidth, const u16 windowHeight,
-	sf::RenderWindow* const window, Renderer* const renderer, Board* const board, InputController* const inputController,
+    Renderer* const renderer, Board* const board, InputController* const inputController,
 	MusicController* const musicController, PieceState* const pieceState, Blocks* const blocks) :
 	m_numPlayers(numPlayers), m_timeToNextDrop(m_framesPerDrop[m_level] / m_framesPerSecond),
 	m_gameWidth(gameWidth), m_gameHeight(gameHeight), m_boardXOffset(boardXOffset), m_boardYOffset(boardYOffset), m_totalWidth(windowWidth), m_totalHeight(windowHeight),

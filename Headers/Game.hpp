@@ -21,7 +21,7 @@ class Game
 {
 public:
 	Game(const u8 numPlayers, const u8 gameWidth, const u8 gameHeight, const u16 boardXOffset, const u16 boardYOffset, const u16 windowWidth, const u16 windowHeight,
-		sf::RenderWindow* const, Renderer* const, Board* const, InputController* const, MusicController* const, PieceState* const, Blocks* const);
+		 Renderer* const, Board* const, InputController* const, MusicController* const, PieceState* const, Blocks* const);
 private: //Private functions - Only the game class should be calling these
 	void loop();
 
